@@ -1,0 +1,108 @@
+@media only screen and (max-width: 767px) { 
+
+/* home page starts */
+.home-feat .col-12 .grid-cols-1 {
+    height: auto;
+}
+.cta-heading {
+    font-size: 22px;
+  }
+.header-sec nav a {
+  width:85%;
+}
+.header-sec nav button {
+  width:14%;
+}
+.sm:px-2 {
+  padding-left: 1rem;
+  padding-left: 1rem;
+}
+  .cta-text {
+    font-size: 14px;
+  }
+  .home-head-1, .home-head {
+    font-size: 38px;
+    text-align: center;
+  }
+  
+  .home-head-2, .home-head2 {
+    font-size: 28px;
+    text-align: center;
+  }
+  .home-product-sec {
+    padding: 10px;
+  }
+  .home-banner-sec .container .row .but {
+    flex-direction: row;
+    padding-bottom: 20px;
+    justify-content: center;
+  }
+  .header-img {
+    width: 80%;
+    height: auto;
+}
+.testimonial-card {
+  max-width: 90%;
+}
+.testimonial-footer {
+  flex-direction: column;
+}
+.testimonial-slider .swiper-button-prev:after {
+  font-size: 20px;
+  margin-left: -25px;
+  font-weight: 600;
+}
+.testimonial-slider .swiper-button-next:after {
+  font-size: 20px;
+  margin-right: -25px;
+  font-weight: 600;
+}
+.home-banner-sec {
+  height: auto;
+  padding:10px;
+}
+.testimonial-section {
+  padding: 0px;
+}
+.product-page-block {
+  padding: 10px;
+}
+.product-page-block .block{
+  padding: 20px;
+}
+.product-grid-img {
+  width: 100%;
+  height: auto;
+}
+.service-card {
+  min-height: auto;
+}
+.product-list-sec {
+  padding: 15px;
+}
+.product-config {
+  padding:15px;
+}
+.product-page-block {
+  padding: 0px;
+}
+
+/* home page ends */
+}
+
+@media only screen and (min-width: 768px) and (max-width: 991px) {
+  .header-img {
+    width: 80%;
+    height: auto;
+}
+.service-card {
+  min-height: auto;
+}
+.product-grid-img {
+  width: 100%;
+  height: auto;
+}
+.home-banner-sec {
+  height: auto;
+}
+}

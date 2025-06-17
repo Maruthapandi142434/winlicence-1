@@ -1,0 +1,9 @@
+User-agent: *
+Disallow: /_next/static/
+Disallow: /admin/
+Disallow: /cgi-bin/
+Disallow: /_next/static/*/_buildManifest.js
+Disallow: /_next/static/*/_ssgManifest.js
+
+Sitemap: https://winlicense.in/sitemap.xml
+
