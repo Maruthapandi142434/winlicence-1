@@ -48,7 +48,7 @@ function BlogPost({ post }) {
             {formatDate(post.created_at)}
           </div>
           <div 
-            className="prose max-w-none"
+            className="prose max-w-none post-content"
             dangerouslySetInnerHTML={{ __html: post.content }}
           />
         </div>

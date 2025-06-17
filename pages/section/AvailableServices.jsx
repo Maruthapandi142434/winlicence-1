@@ -5,56 +5,32 @@ const services = [
   {
     title: "Lifetime Support",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648933/blog-image-1_wlgj8a.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "lifetimesup-getstarted"
   },
   {
     title: "Client Management",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648934/client_management_mcwviw.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "clientman-getstarted"
   },
   {
     title: "Easy to Use Customer",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648934/customer_spport_gyisbf.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "easytouse-getstarted"
   },
   {
     title: "Hosting Features",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648934/hosting_feature_ja9xlv.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "hosting-getstarted"
   },
   {
     title: "Email Hosting",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648934/email_hosting_omfyzy.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "emailhosting-getstarted"
   },
   {
     title: "Powerful Hosting",
     image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738648933/powder_hosting_tby12o.jpg",
-    // features: [
-    //   "30 Day Money Back Guarantee",
-    //   "24x7x365 Support",
-    //   "Dual Quad-Core Powered Servers hardware",
-    // ],
+    id: "powerhosting-getstarted"
   },
 ];
 
@@ -74,13 +50,6 @@ const AvailableServices = () => {
           >
             <img src={service.image} alt={service.title} className="service-image" />
             <h3 className="service-title text-center">{service.title}</h3>
-            {/* <ul className="service-list">
-              {service.features.map((feature, i) => (
-                <li key={i}><i className="fa-regular fa-square-check"></i><TextAnimate animation="fadeIn" by="line">
-                {feature}
-              </TextAnimate> </li>
-              ))}
-            </ul> */}
           </motion.div>
         ))}
       </div>

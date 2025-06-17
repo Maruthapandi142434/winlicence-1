@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { TextAnimate } from "../../@/components/ui/text-animate";
 import MetaTags from '../../components/MetaTags';
 import { organizations } from "../../lib/data/schema"
+import Head from 'next/head';
 
 function BlogIndex({ initialData }) {
   const [posts, setPosts] = useState(initialData?.posts || []);

@@ -34,12 +34,12 @@ const Footer = () => {
     <div className="col-lg-2 col-md-6">
     <h3>Quick Links</h3>
     <ul>
-      <li><Link href='#'>About</Link></li>
-      <li> <Link href='#'>Services</Link></li>
-      <li><Link href="product">Product</Link></li>
-      <li><Link href='#'>Clients</Link></li>
-      <li><Link href=''>Product</Link></li>
-      <li><Link href='#'>Contact</Link></li>
+      <li><Link href='/about/about-us'>About</Link></li>
+      <li> <Link href='/service'>Services</Link></li>
+      <li><Link href="/product">Product</Link></li>
+      <li><Link href='/clients'>Clients</Link></li>
+      <li><Link href='/blog'>Blog</Link></li>
+      <li><Link id='hm-footer-contact' href='/contact'>Contact</Link></li>
     </ul>
     </div>
 

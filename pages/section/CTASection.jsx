@@ -15,7 +15,7 @@ const CTASection = () => {
         <h2>Server builds on the strengths of Microsoft Products</h2>
         <div className="cta-button-wrapper">
           <FaArrowRight className="cta-arrow" />
-          <Link href="/contact" className="cta-button">
+          <Link href="/contact" className="cta-button" id="cta-sec-button">
             Contact Us
           </Link>
         </div>

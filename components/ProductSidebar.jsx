@@ -28,24 +28,21 @@ const ProductSidebar = ({
       {showCategoryFilters && (
         <div className="space-y-2 max-h-[calc(250vh-200px)] overflow-y-auto">
           {categories.map((category) => (
-            <div key={category.slug} className="flex m-2 items-center p-2 rounded cursor-pointer hover:bg-blue-500 hover:text-white text-gray-700">
-              <div className="flex items-center">
-              </div>
-              <div className="flex items-center">
-                <img 
-                  src={category.img} 
-                  alt={category.name} 
-                  className="w-8 h-8 mr-2 object-contain" 
-                />
 
-                <Link 
-                  href={`/product/category/${category.slug}`}
-                  className="text-lg hover:text-white"
-                >
-                  {category.name}
-                </Link>
-              </div>
-            </div>
+            <Link key={category.slug} href={`/product/category/${category.slug}`}>
+  <div className={`flex m-2 items-center p-2 rounded cursor-pointer 
+    ${router.asPath === `/product/category/${category.slug}` ? 'bg-blue-500 text-white' : 'text-gray-800'} 
+    hover:bg-blue-500 hover:text-white`}>
+    <img 
+      src={category.img} 
+      alt={category.name} 
+      className="w-8 h-8 mr-2 object-contain"
+    />
+    <span className="text-lg">
+      {category.name}
+    </span>
+  </div>
+</Link>
           ))}
         </div>
       )}

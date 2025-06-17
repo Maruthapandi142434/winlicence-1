@@ -1233,3 +1233,16 @@ align-content: center;
 .product-config {
   padding: 20px 40px;
 }
+
+.post-content h2 {
+  font-size: 24px;
+  padding:3px 0;
+}
+.post-content h3 {
+  font-size: 22px;
+  padding:3px 0;
+}
+.post-content h4 {
+  font-size: 20px;
+  padding:3px 0;
+}

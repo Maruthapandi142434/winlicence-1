@@ -85,8 +85,8 @@ function Index() {
   {"Microsoft Products"}
 </TextAnimate>
 <div className="but font-normal text-base text-neutral-300 max-w-lg text-left ">
-            <div className='but-1'> <Link href="contact" className='text-black'><ShinyButton> Contact Us</ShinyButton></Link></div>
-            <div className='but-2'><Link href="#products"><ShinyButton>Get Started</ShinyButton></Link></div>
+            <div className='but-1'> <Link href="contact" className='text-black' ><ShinyButton id='hm-top-contactus'> Contact Us</ShinyButton></Link></div>
+            <div className='but-2'><Link href="#products"><ShinyButton id='getstarted'>Get Started</ShinyButton></Link></div>
             </div>
             </div>
               <div className="col-12 col-md-7">
@@ -145,7 +145,7 @@ function Index() {
         transition={{ duration: 0.5 }}
       >
         <h2 className="cta-heading">REQUEST A CALLBACK OR SEND MAIL</h2>
-        <a href="/contact" className="cta-button">
+        <a href="/contact" className="home-cta-button" id='hm-mid-contactus'>
           Contact Us
         </a>
       </motion.div>

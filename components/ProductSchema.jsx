@@ -2,7 +2,8 @@ import React from 'react'
 import Head from 'next/head';
 
 export async function getServerSideProps(context) {
-    const { slug } = context.params;
+
+    
     // Fetch product from database
     const product = await db.query('SELECT * FROM products WHERE slug = ?', [slug]);
     

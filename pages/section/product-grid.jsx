@@ -21,6 +21,7 @@ export default function ProductGrid() {
                 <Link
                   href="/product"
                   className="inline-flex items-center justify-center px-6 py-3 bg-gray-900 text-white font-medium rounded-lg hover:bg-gray-800 transition-colors"
+                  id="hm-viewall"
                 >
                   View all
                 </Link>
@@ -45,7 +46,7 @@ Windows Server 2025</h3>
               <p className="mt-2 text-gray-800 text-wrap2 text-left">server operating system designed for secure, scalable enterprise solutions...</p>
               <Link 
                 href="/product/category/windows-server-2025" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>
@@ -66,7 +67,7 @@ Windows Server 2025</h3>
               <p className="mt-2 text-gray-800 text-wrap2 text-left">Remote Desktop Services Client Access License for streamlined business connectivity...</p>
               <Link 
                 href="/product/category/windows-server-2025-rds" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>
@@ -87,7 +88,7 @@ Windows Server 2025</h3>
               <p className="mt-2 text-gray-800 text-wrap2 text-left">Essential access licenses enabling users to connect to Windows Server 2025 securely...</p>
               <Link 
                 href="/product/category/windows-server-2025-cal" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>
@@ -108,7 +109,7 @@ Windows Server 2025</h3>
               <p className="mt-2 text-gray-800 text-wrap2 text-left">A high-performance database management system for reliable data processing and analytics...</p>
               <Link 
                 href="/product/category/sql-server-2022" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>
@@ -129,7 +130,7 @@ Windows Server 2025</h3>
               <p className="mt-2 text-gray-800 text-wrap2 text-left">The latest Windows OS, delivering modern UI and powerful performance....</p>
               <Link 
                 href="/product/category/windows-11" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>
@@ -151,7 +152,7 @@ Windows Server 2025</h3>
 ...</p>
               <Link 
                 href="/product/category/windows-11" 
-                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700"
+                className="mt-2 inline-block text-blue-600 font-medium hover:underline hover:text-blue-700 home-buy-btn"
               >
                 Buy Now
               </Link>

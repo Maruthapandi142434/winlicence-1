@@ -19,36 +19,42 @@ function Service() {
       description:
         "We offer lifetime support to ensure your services run smoothly without interruption. Our dedicated support team is available 24/7 to assist you with technical issues, answer questions, and guide you through any challenges that may arise.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/blog-image-1_u55yx8.jpg",
+      id:"lifetimesup-getstarted"
     },
     {
       title: "Client Management",
       description:
         "Manage your clients effortlessly with our user-friendly tools designed to streamline communication, track projects, and maintain records. Whether you're a small business or an enterprise, our system adapts to your needs for optimal efficiency.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/client_management_jqtj79.jpg",
+      id:"clientman-getstarted"
     },
     {
       title: "Easy to Use Customer",
       description:
         "Our platform is built with simplicity in mind, allowing customers to easily navigate, manage their accounts, and access the services they need. No technical knowledge required — everything is just a few clicks away.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/customer_spport_ejgbz9.jpg",
+      id:"easytouse-getstarted"
     },
     {
       title: "Hosting Features",
       description:
         "Enjoy a wide range of hosting features including unlimited bandwidth, fast SSD storage, one-click installations, and daily backups. We ensure high performance, reliability, and scalability for your growing business.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/hosting_feature_j91afi.jpg",
+      id:"hosting-getstarted"
     },
     {
       title: "Email Hosting",
       description:
         "Get professional email solutions with custom domain addresses, high-level security, spam protection, and reliable uptime. Perfect for businesses that need secure and professional communication channels.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/email_hosting_rin2ha.jpg",
+      id:"emailhosting-getstarted"
     },
     {
       title: "Powerful Hosting",
       description:
         "Experience powerful hosting designed for speed, security, and performance. Our servers are optimized to handle high traffic and resource-heavy applications without compromising on reliability.",
       image: "https://res.cloudinary.com/daggx9p24/image/upload/v1738820997/powder_hosting_q4dtqg.jpg",
+      id:"powerhosting-getstarted"
     },
   ];
 
@@ -98,7 +104,7 @@ function Service() {
             {service.title}
           </h2>
           <p className="text-gray-600 mb-3 text-wrap3">{service.description}</p>
-          <div className='service-btn'><Link href="/contact"><ShinyButton>Get Started</ShinyButton></Link></div>
+          <div className='service-btn'><Link href="/contact" id={service.id}><ShinyButton >Get Started</ShinyButton></Link></div>
         </div>
         
 
