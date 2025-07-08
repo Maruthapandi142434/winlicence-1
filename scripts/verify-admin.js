@@ -20,7 +20,7 @@ async function verifyAdmin() {
     );
 
     if (users.length === 0) {
-      console.log('Admin user not found. Creating new admin user...');
+      
       
       // Create new admin user
       const password = 'admin123';
@@ -31,9 +31,9 @@ async function verifyAdmin() {
         ['admin', 'admin@example.com', hashedPassword, 'admin']
       );
       
-      console.log('Admin user created successfully');
+     
     } else {
-      console.log('Admin user exists. Updating password...');
+      
       
       // Update existing admin user's password
       const password = 'admin123';
@@ -44,14 +44,11 @@ async function verifyAdmin() {
         [hashedPassword, 'admin']
       );
       
-      console.log('Admin password updated successfully');
+      
     }
 
     await connection.end();
     
-    console.log('\nAdmin credentials:');
-    console.log('Username: admin');
-    console.log('Password: admin123');
   } catch (error) {
     console.error('Error:', error);
   }

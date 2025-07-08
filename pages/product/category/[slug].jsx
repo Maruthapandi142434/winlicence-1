@@ -219,7 +219,15 @@ function CategoryPage() {
                                   passHref
                                   legacyBehavior
                                 >
-                                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors text-lg w-full">
+                                  <button className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors text-lg w-full"
+                                  data-product-id={product.productId}
+                                  data-product-name={product.productName}
+                                  data-product-price={price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
+                                  data-product-term= {cycle === '/month' ? 'month' : 
+                                    cycle === '/year' ? 'yearly' : 
+                                    cycle === '/3 years' ? '3 years' :
+                                    cycle === '/one-time' ? 'one-time' : ''}
+                                  >
                                     Buy Now
                                   </button>
                                 </Link>

@@ -107,37 +107,41 @@ function BlogIndex({ initialData }) {
       ) : (
         <>
           <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {posts.map(post => (
-              <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
-                {post.featured_image ? (
-                  <img
-                    src={post.featured_image}
-                    alt={post.title}
-                    className="w-full h-48 object-cover"
-                    onError={(e) => {
-                      e.target.src = 'https://via.placeholder.com/800x400';
-                    }}
-                  />
-                ) : (
-                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
-                    <span className="text-gray-500">No image available</span>
+            {posts.map(post => {
+              return (
+                <div key={post.id} className="bg-white rounded-lg shadow-md overflow-hidden">
+                  {post.featured_image ? (
+                    <img
+                      src={post.featured_image}
+                      alt={post.title}
+                      className="w-full h-48 object-cover"
+                      onError={(e) => {
+                        e.target.src = 'https://res.cloudinary.com/daggx9p24/image/upload/v1738923028/blpg-img_ps0xm9.jpg';
+                      }}
+                    />
+                  ) : (
+                    <div className="w-full h-48 bg-gray-200 flex items-center justify-center">
+                      <span className="text-gray-500">No image available</span>
+                    </div>
+                  )}
+                  
+                  
+                  <div className="p-6">
+                    <h2 className="text-xl font-bold mb-2">{post.title}</h2>
+                    <div className="text-gray-600 text-sm mb-2">
+                      {formatDate(post.created_at)}
+                    </div>
+                    <p className="text-gray-800 mb-4">{post.excerpt}</p>
+                    <a
+                      href={`/blog/${post.slug}`}
+                      className="text-blue-500 hover:underline"
+                    >
+                      Read More
+                    </a>
                   </div>
-                )}
-                <div className="p-6">
-                  <h2 className="text-xl font-bold mb-2">{post.title}</h2>
-                  <div className="text-gray-600 text-sm mb-2">
-                    {formatDate(post.created_at)}
-                  </div>
-                  <p className="text-gray-800 mb-4">{post.excerpt}</p>
-                  <a
-                    href={`/blog/${post.slug}`}
-                    className="text-blue-500 hover:underline"
-                  >
-                    Read More
-                  </a>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
 
           {posts.length === 0 && (

@@ -179,7 +179,15 @@ function ProductsList() {
                                 passHref
                                 legacyBehavior
                               >
-                                <button className="bg-blue-600 w-full hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors w-full text-lg">
+                                <button className="bg-blue-600 w-full hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors w-full text-lg"
+                                data-product-id={product.productId}
+                                data-product-name={product.productName}
+                                data-product-price={price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
+                                data-product-term= {cycle === '/month' ? 'month' : 
+                                  cycle === '/year' ? 'yearly' : 
+                                  cycle === '/3 years' ? '3 years' :
+                                  cycle === '/one-time' ? 'one-time' : ''}
+                                >
                                   Buy Now
                                 </button>
                               </Link>

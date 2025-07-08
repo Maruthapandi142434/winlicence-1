@@ -18,8 +18,6 @@ async function addCategoryIdColumn() {
       ADD COLUMN IF NOT EXISTS category_id INT,
       ADD FOREIGN KEY (category_id) REFERENCES blog_categories(id)
     `);
-
-    console.log('Successfully added category_id column');
     await connection.end();
   } catch (error) {
     console.error('Migration failed:', error);

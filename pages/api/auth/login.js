@@ -1,7 +1,9 @@
-import mysql from 'mysql2/promise';
+import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
 import { SignJWT } from 'jose';
 import { serialize } from 'cookie';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -11,27 +13,17 @@ export default async function handler(req, res) {
   const { username = '', password = '' } = req.body || {};
 
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      port: process.env.DATABASE_PORT,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      ssl: process.env.DATABASE_SSL === 'true',
-    });
-
-    const [users] = await connection.execute(
-      'SELECT * FROM admin_users WHERE username = ?',
-      [username.trim()]
-    );
-
-    await connection.end();
-
-    if (users.length === 0) {
+    // Try customer user first
+    let user = await prisma.user.findUnique({ where: { username: username.trim() } });
+    let userType = 'user';
+    if (!user) {
+      // Try admin user
+      user = await prisma.adminUser.findUnique({ where: { username: username.trim() } });
+      userType = user ? user.role : null;
+    }
+    if (!user) {
       return res.status(401).json({ message: 'Invalid credentials' });
     }
-
-    const user = users[0];
 
     const passwordMatch = await bcrypt.compare(password, user.password);
     if (!passwordMatch) {
@@ -42,7 +34,7 @@ export default async function handler(req, res) {
     const token = await new SignJWT({
       userId: user.id,
       username: user.username,
-      role: user.role,
+      role: userType,
     })
       .setProtectedHeader({ alg: 'HS256' })
       .setExpirationTime('8h')
@@ -64,7 +56,7 @@ export default async function handler(req, res) {
       user: {
         id: user.id,
         username: user.username,
-        role: user.role,
+        role: userType,
       },
     });
   } catch (error) {
@@ -73,5 +65,7 @@ export default async function handler(req, res) {
       message: 'Internal server error',
       error: error.message,
     });
+  } finally {
+    await prisma.$disconnect();
   }
 }

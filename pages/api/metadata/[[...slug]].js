@@ -1,16 +1,6 @@
-import mysql from 'mysql2/promise';
+import { PrismaClient } from '@prisma/client';
 
-const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  port: process.env.DATABASE_PORT,
-  database: process.env.DB_NAME,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  ssl: process.env.DATABASE_SSL === 'true',
-  waitForConnections: true,
-  connectionLimit: 15,
-  queueLimit: 30
-});
+const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   // Handle catch-all route parameter
@@ -32,57 +22,45 @@ export default async function handler(req, res) {
   }
 
   // Normalize path (remove leading/trailing slashes except for home)
-  const cleanPath = decodedPath === 'home' ? '/' : decodedPath.replace(/^\/|\/$/g, '');
+  const cleanPath = decodedPath === 'home' ? '/' : decodedPath.replace(/^\/+|\/+$/g, '');
 
-  let connection;
   try {
-    connection = await pool.getConnection();
-    
-    // Query with multiple possible path formats
-    const [matches] = await connection.query(
-      `SELECT * FROM page_metadata 
-       WHERE page_slug = ? OR page_slug = ? OR page_slug = ? OR page_slug = ?
-       ORDER BY 
-         CASE 
-           WHEN page_slug = ? THEN 1
-           WHEN page_slug = ? THEN 2
-           WHEN page_slug = ? THEN 3
-           WHEN page_slug = ? THEN 4
-           ELSE 5
-         END
-       LIMIT 1`,
-      [
-        cleanPath,
-        `/${cleanPath}`,
-        `${cleanPath}/`,
-        `/${cleanPath}/`,
-        cleanPath,        // Exact match priority
-        `/${cleanPath}`,  // With leading slash
-        `${cleanPath}/`,  // With trailing slash
-        `/${cleanPath}/`  // With both slashes
-      ]
-    );
+    // Try all path variants in order of priority
+    const pathVariants = [
+      cleanPath,
+      `/${cleanPath}`,
+      `${cleanPath}/`,
+      `/${cleanPath}/`,
+    ];
 
-    if (matches.length > 0) {
+    let match = null;
+    for (const variant of pathVariants) {
+      match = await prisma.pageMetadata.findFirst({
+        where: { pageSlug: variant },
+        orderBy: { id: 'asc' },
+      });
+      if (match) break;
+    }
+
+    if (match) {
       return res.status(200).json({
         success: true,
-        metadata: matches[0]
+        metadata: match,
       });
     }
 
     return res.status(404).json({ 
       success: false,
       error: 'Metadata not found',
-      requestedPath: cleanPath
+      requestedPath: cleanPath,
     });
-
   } catch (error) {
     console.error('Database error:', error);
     return res.status(500).json({ 
       success: false,
-      error: 'Internal server error'
+      error: 'Internal server error',
     });
   } finally {
-    if (connection) connection.release();
+    await prisma.$disconnect();
   }
 }

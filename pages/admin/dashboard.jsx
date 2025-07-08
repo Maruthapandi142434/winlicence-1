@@ -26,6 +26,12 @@ export default function Dashboard({ stats }) {
     checkAuth();
   }, [checkAuth]);
 
+  useEffect(() => {
+    if (!loading && user && user.role !== 'admin' && user.role !== 'editor' && user.role !== 'author') {
+      router.replace('/dashboard');
+    }
+  }, [loading, user, router]);
+
   if (loading) {
     return <div>Loading...</div>;
   }
@@ -40,33 +46,33 @@ export default function Dashboard({ stats }) {
 
   return (
     <AdminLayout>
-      <div className="container mx-auto">
-        <h1 className="text-2xl font-bold mb-8">Dashboard</h1>
+      <div className="container mx-auto px-2 sm:px-4 md:px-8">
+        <h1 className="text-xl sm:text-2xl font-bold mb-4 sm:mb-8">Dashboard</h1>
 
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
           {[
             { label: 'Total Posts', value: dashboardStats.totalPosts },
             { label: 'Published Posts', value: dashboardStats.publishedPosts },
             { label: 'Categories', value: dashboardStats.totalCategories },
             { label: 'Tags', value: dashboardStats.totalTags },
           ].map((item, index) => (
-            <div key={index} className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-gray-500 text-sm font-medium">{item.label}</h2>
-              <p className="mt-2 text-3xl font-bold">{item.value}</p>
+            <div key={index} className="bg-white rounded-lg shadow p-4 sm:p-6">
+              <h2 className="text-gray-500 text-xs sm:text-sm font-medium">{item.label}</h2>
+              <p className="mt-2 text-2xl sm:text-3xl font-bold">{item.value}</p>
             </div>
           ))}
         </div>
 
-        <div className="mt-8 bg-white rounded-lg shadow">
-          <h2 className="text-lg font-medium p-6 border-b">Recent Posts</h2>
+        <div className="mt-6 sm:mt-8 bg-white rounded-lg shadow">
+          <h2 className="text-base sm:text-lg font-medium p-4 sm:p-6 border-b">Recent Posts</h2>
           <div className="divide-y">
             {dashboardStats.recentPosts.length > 0 ? (
               dashboardStats.recentPosts.map((post) => (
-                <div key={post.id} className="p-6">
-                  <h3 className="font-medium">{post.title}</h3>
-                  <div className="mt-1 flex items-center text-sm text-gray-500">
+                <div key={post.id} className="p-4 sm:p-6">
+                  <h3 className="font-medium text-sm sm:text-base">{post.title}</h3>
+                  <div className="mt-1 flex flex-wrap items-center text-xs sm:text-sm text-gray-500 gap-x-2">
                     <span>{post.created_at}</span>
-                    <span className="mx-2">•</span>
+                    <span className="mx-2 hidden sm:inline">•</span>
                     <span
                       className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
                         post.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
@@ -78,7 +84,7 @@ export default function Dashboard({ stats }) {
                 </div>
               ))
             ) : (
-              <p className="p-6 text-gray-500">No recent posts available.</p>
+              <p className="p-4 sm:p-6 text-gray-500">No recent posts available.</p>
             )}
           </div>
         </div>

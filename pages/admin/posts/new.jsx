@@ -35,7 +35,10 @@ function NewPost({ categories }) {
       const response = await fetch('/api/admin/posts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({
+          ...formData,
+          category_id: Number(formData.category_id),
+        }),
       });
 
       if (response.ok) router.push('/admin/posts');

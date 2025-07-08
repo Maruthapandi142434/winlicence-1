@@ -37,7 +37,7 @@ export default function InitiatedOrders() {
 
   return (
     <AdminLayout>
-      <div className="p-5">
+      <div className="p-2 sm:p-4 md:p-5">
         <h2 className="text-2xl font-semibold mb-4">Initiated Orders</h2>
 
         {/* Filter Form */}
@@ -72,7 +72,7 @@ export default function InitiatedOrders() {
 
         {/* Orders Table */}
         <div className="order-table-con">
-          <table className=" border-collapse border border-gray-300 text-sm">
+          <table className="border-collapse border border-gray-300 text-xs sm:text-sm w-full">
             <thead className="bg-gray-100">
               <tr>
                 {[
@@ -91,7 +91,7 @@ export default function InitiatedOrders() {
                   'Total',
                   'Created At',
                 ].map((heading) => (
-                  <th key={heading} className="border px-4 py-2 text-left">
+                  <th key={heading} className="border px-2 sm:px-4 py-1 sm:py-2 text-left">
                     {heading}
                   </th>
                 ))}
@@ -101,25 +101,25 @@ export default function InitiatedOrders() {
               {orders.length > 0 ? (
                 orders.map((order) => (
                   <tr key={order.id} className="hover:bg-gray-50">
-                    <td className="border px-4 py-2">{order.id}</td>
-                    <td className="border px-4 py-2">{order.name}</td>
-                    <td className="border px-4 py-2">{order.email}</td>
-                    <td className="border px-4 py-2">{order.phone}</td>
-                    <td className="border px-4 py-2">{order.company}</td>
-                    <td className="border px-4 py-2">{order.subject}</td>
-                    <td className="border px-4 py-2">{order.product}</td>
-                    <td className="border px-4 py-2">{order.license_type}</td>
-                    <td className="border px-4 py-2">{order.cores}</td>
-                    <td className="border px-4 py-2">{order.package}</td>
-                    <td className="border px-4 py-2">{order.billing}</td>
-                    <td className="border px-4 py-2">{order.quantity}</td>
-                    <td className="border px-4 py-2">{order.total}</td>
-                    <td className="border px-4 py-2">{formatDate(order.created_at)}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.id}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.name}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.email}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.phone}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.company}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.subject}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.product}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.license_type}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.cores}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.package}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.billing}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.quantity}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{order.total ? Number(order.total).toLocaleString('en-IN') : '-'}</td>
+                    <td className="border px-2 sm:px-4 py-1 sm:py-2">{(order.createdAt || order.created_at) && !isNaN(Date.parse(order.createdAt || order.created_at)) ? new Date(order.createdAt || order.created_at).toLocaleDateString('en-GB') : '-'}</td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="12" className="text-center border px-4 py-3 text-gray-500">
+                  <td colSpan="12" className="text-center border px-2 sm:px-4 py-2 text-gray-500">
                     No orders found.
                   </td>
                 </tr>

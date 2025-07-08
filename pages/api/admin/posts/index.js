@@ -1,23 +1,14 @@
-import mysql from 'mysql2/promise';
+import { PrismaClient } from '@prisma/client';
 import slugify from 'slugify';
+
+const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (!['POST', 'PUT', 'DELETE'].includes(req.method)) {
     return res.status(405).json({ message: 'Method not allowed' });
   }
 
-  let connection;
-
   try {
-    connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      port: process.env.DATABASE_PORT || 3306, // Default MySQL port
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      ssl: process.env.DATABASE_SSL === 'true' ? { rejectUnauthorized: true } : false,
-    });
-
     if (req.method === 'POST') {
       const { title, content, excerpt, category_id, author, featured_image, published, scheduled_for, status } = req.body;
 
@@ -27,24 +18,22 @@ export default async function handler(req, res) {
 
       const slug = slugify(title, { lower: true });
 
-      const [result] = await connection.execute(
-        `INSERT INTO blog_posts (title, slug, content, excerpt, category_id, author, featured_image, published, scheduled_for, status) 
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-        [
+      const post = await prisma.blogPost.create({
+        data: {
           title,
           slug,
           content,
           excerpt,
-          category_id,
+          categoryId: category_id,
           author,
-          featured_image || null,
-          published || null,
-          scheduled_for ? new Date(scheduled_for).toISOString() : null,
-          status || 'draft',
-        ]
-      );
+          featuredImage: featured_image || null,
+          published: published || false,
+          scheduledFor: scheduled_for ? new Date(scheduled_for) : null,
+          status: status || 'draft',
+        },
+      });
 
-      return res.status(201).json({ id: result.insertId, slug, message: 'Post created successfully' });
+      return res.status(201).json({ id: post.id, slug, message: 'Post created successfully' });
     }
 
     if (req.method === 'PUT') {
@@ -56,28 +45,21 @@ export default async function handler(req, res) {
 
       const slug = slugify(title, { lower: true });
 
-      const [result] = await connection.execute(
-        `UPDATE blog_posts 
-         SET title = ?, slug = ?, content = ?, excerpt = ?, category_id = ?, author = ?, featured_image = ?, published = ?, scheduled_for = ?, status = ? 
-         WHERE id = ?`,
-        [
+      const post = await prisma.blogPost.update({
+        where: { id },
+        data: {
           title,
           slug,
           content,
           excerpt,
-          category_id,
+          categoryId: category_id,
           author,
-          featured_image || null,
-          published || null,
-          scheduled_for ? new Date(scheduled_for).toISOString() : null,
-          status || 'draft',
-          id,
-        ]
-      );
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Post not found' });
-      }
+          featuredImage: featured_image || null,
+          published: published || false,
+          scheduledFor: scheduled_for ? new Date(scheduled_for) : null,
+          status: status || 'draft',
+        },
+      });
 
       return res.status(200).json({ message: 'Post updated successfully' });
     }
@@ -89,11 +71,7 @@ export default async function handler(req, res) {
         return res.status(400).json({ message: 'Missing post ID' });
       }
 
-      const [result] = await connection.execute('DELETE FROM blog_posts WHERE id = ?', [id]);
-
-      if (result.affectedRows === 0) {
-        return res.status(404).json({ message: 'Post not found' });
-      }
+      const deleted = await prisma.blogPost.delete({ where: { id } });
 
       return res.status(200).json({ message: 'Post deleted successfully' });
     }
@@ -101,8 +79,6 @@ export default async function handler(req, res) {
     console.error('Database Error:', error);
     return res.status(500).json({ message: 'Internal server error', error: error.message });
   } finally {
-    if (connection) {
-      await connection.end();
-    }
+    await prisma.$disconnect();
   }
 }

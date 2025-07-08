@@ -85,15 +85,15 @@ export default function MetadataAdmin() {
     <div>
       <div className="bg-[#f6f9fff7] blog-admin-sec">
         <AdminLayout>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 gap-2 sm:gap-0">
             <button
               onClick={() => setCurrentItem({})}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 w-full sm:w-auto mb-2 sm:mb-0"
             >
               Add New Metadata
             </button>
 
-            <div className="flex items-center space-x-4 mx-2">
+            <div className="flex flex-col sm:flex-row w-full sm:w-auto gap-2 sm:gap-4 mx-0 sm:mx-2">
               <input
                 type="text"
                 placeholder="Search metadata..."
@@ -102,13 +102,12 @@ export default function MetadataAdmin() {
                   setSearchTerm(e.target.value);
                   setCurrentPage(1);
                 }}
-                className="p-2 border rounded"
+                className="p-2 border rounded w-full sm:w-auto"
               />
-
               <select
                 value={itemsPerPage}
                 onChange={(e) => setItemsPerPage(Number(e.target.value))}
-                className="p-2 border rounded"
+                className="p-2 border rounded w-full sm:w-auto"
               >
                 <option value={10}>10 per page</option>
                 <option value={25}>25 per page</option>
@@ -126,43 +125,46 @@ export default function MetadataAdmin() {
           )}
 
           <div className="bg-white rounded-lg shadow overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Page Slug</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {currentItems.map((item) => (
-                  <tr key={item.id}>
-                    <td className="px-6 py-4">{item.page_slug}</td>
-                    <td className="px-6 py-4 truncate max-w-xs">{item.title}</td>
-                    <td className="px-6 py-4 space-x-2">
-                      <button 
-                        onClick={() => setCurrentItem(item)} 
-                        className="text-blue-500 hover:text-blue-700 pr-2"
-                      >
-                        Edit
-                      </button>
-                      <button 
-                        onClick={() => handleDelete(item.id)} 
-                        className="text-red-500 hover:text-red-700 pr-2"
-                      >
-                        Delete
-                      </button>
-                      <button 
-                        onClick={() => router.push(`/${item.page_slug}`)} 
-                        className="text-green-500 hover:text-green-700 pr-2"
-                      >
-                        View
-                      </button>
-                    </td>
+            <div className="overflow-x-auto">
+              <div className="text-xs text-gray-500 mb-2 block md:hidden">Scroll right to see more →</div>
+              <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Page Slug</th>
+                    <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                    <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {currentItems.map((item) => (
+                    <tr key={item.id}>
+                      <td className="px-6 py-4">{item.page_slug}</td>
+                      <td className="px-6 py-4 truncate max-w-xs">{item.title}</td>
+                      <td className="px-6 py-4 space-x-2">
+                        <button 
+                          onClick={() => setCurrentItem(item)} 
+                          className="text-blue-500 hover:text-blue-700 pr-2"
+                        >
+                          Edit
+                        </button>
+                        <button 
+                          onClick={() => handleDelete(item.id)} 
+                          className="text-red-500 hover:text-red-700 pr-2"
+                        >
+                          Delete
+                        </button>
+                        <button 
+                          onClick={() => router.push(`/${item.page_slug}`)} 
+                          className="text-green-500 hover:text-green-700 pr-2"
+                        >
+                          View
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
 
             {/* Pagination */}
             <div className="flex justify-between items-center px-4 py-3 border-t bg-white">

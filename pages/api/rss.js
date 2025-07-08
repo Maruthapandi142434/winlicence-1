@@ -1,5 +1,6 @@
-import mysql from 'mysql2/promise';
+import { PrismaClient } from '@prisma/client';
 
+const prisma = new PrismaClient();
 
 export default async function handler(req, res) {
   if (req.method !== 'GET') {
@@ -7,27 +8,21 @@ export default async function handler(req, res) {
   }
 
   try {
-    const connection = await mysql.createConnection({
-      host: process.env.DB_HOST,
-      port: process.env.DATABASE_PORT,
-      database: process.env.DB_NAME,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      ssl: process.env.DATABASE_SSL === 'true'
+    const posts = await prisma.blogPost.findMany({
+      where: { published: true },
+      orderBy: { createdAt: 'desc' },
+      take: 10,
+      select: {
+        title: true,
+        excerpt: true,
+        content: true,
+        createdAt: true,
+        slug: true,
+      },
     });
 
-    const [posts] = await connection.execute(`
-      SELECT title, excerpt, content, created_at, slug 
-      FROM blog_posts 
-      WHERE published = 1 
-      ORDER BY created_at DESC 
-      LIMIT 10
-    `);
-
-    await connection.end();
-
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL;
-    
+
     const rss = `<?xml version="1.0" encoding="UTF-8" ?>
 <rss version="2.0">
   <channel>
@@ -39,8 +34,8 @@ export default async function handler(req, res) {
       <item>
         <title>${escapeXml(post.title)}</title>
         <link>${baseUrl}/blog/${post.slug}</link>
-        <description>${escapeXml(post.excerpt)}</description>
-        <pubDate>${new Date(post.created_at).toUTCString()}</pubDate>
+        <description>${escapeXml(post.excerpt || '')}</description>
+        <pubDate>${new Date(post.createdAt).toUTCString()}</pubDate>
         <guid>${baseUrl}/blog/${post.slug}</guid>
       </item>
     `).join('')}
@@ -53,16 +48,18 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error('Error generating RSS feed:', error);
     res.status(500).json({ message: 'Internal server error' });
+  } finally {
+    await prisma.$disconnect();
   }
 }
 
 function escapeXml(unsafe) {
-  return unsafe.replace(/[<>&'"]/g, c => {
+  return unsafe.replace(/[<>&'\"]/g, c => {
     switch (c) {
       case '<': return '&lt;';
       case '>': return '&gt;';
       case '&': return '&amp;';
-      case '\'': return '&apos;';
+      case "'": return '&apos;';
       case '"': return '&quot;';
     }
   });

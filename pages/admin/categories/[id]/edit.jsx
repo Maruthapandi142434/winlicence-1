@@ -17,12 +17,12 @@ export default function EditCategory({ category }) {
     setError('');
 
     try {
-      const res = await fetch(`/api/categories/${category.id}`, {
+      const res = await fetch(`/api/admin/categories`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ id: category.id, name: formData.name, slug: formData.slug }),
       });
 
       if (!res.ok) {

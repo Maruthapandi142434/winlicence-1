@@ -15,6 +15,7 @@ const ContactUsForm = () => {
   });
 
   const [state, setState] = useState(initState); // Initialize the state
+  const [formError, setFormError] = useState('');
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -24,8 +25,30 @@ const ContactUsForm = () => {
     });
   };
 
+  function validateForm() {
+    // Name: only letters and spaces, min 2 chars
+    if (!/^[A-Za-z ]{2,}$/.test(formData.name.trim())) {
+      return 'Please enter a valid name (letters and spaces only, at least 2 characters).';
+    }
+    // Indian phone: 10 digits, starts with 6-9
+    if (!/^[6-9]\d{9}$/.test(formData.phone.trim())) {
+      return 'Please enter a valid 10-digit mobile number.';
+    }
+    // Email: basic format
+    if (!/^\S+@\S+\.\S+$/.test(formData.email.trim())) {
+      return 'Please enter a valid email address.';
+    }
+    return '';
+  }
+
   const onSubmit = async (event) => {
     event.preventDefault();
+    setFormError('');
+    const errorMsg = validateForm();
+    if (errorMsg) {
+      setFormError(errorMsg);
+      return;
+    }
     setState((prev) => ({
       ...prev,
       isLoading: true,
@@ -57,6 +80,11 @@ const ContactUsForm = () => {
   return (
     <div className="contactusform">
       <form onSubmit={onSubmit} className="space-y-6 " id='contactform'>
+        {formError && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {formError}
+          </div>
+        )}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Name */}
           <div className="formField">

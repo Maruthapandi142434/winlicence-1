@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/router';
+import Link from 'next/link';
 
 export default function Login() {
   const router = useRouter();
@@ -9,10 +10,29 @@ export default function Login() {
   });
   const [error, setError] = useState('');
 
+  function validateLoginForm() {
+    // If username looks like an email, validate as email
+    if (formData.username.includes('@')) {
+      if (!/^\S+@\S+\.\S+$/.test(formData.username.trim())) {
+        return 'Please enter a valid email address.';
+      }
+    } else if (/^\d{10}$/.test(formData.username.trim())) {
+      // If username is 10 digits, validate as Indian phone
+      if (!/^[6-9]\d{9}$/.test(formData.username.trim())) {
+        return 'Please enter a valid 10-digit Indian mobile number.';
+      }
+    }
+    return '';
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
-
+    const errorMsg = validateLoginForm();
+    if (errorMsg) {
+      setError(errorMsg);
+      return;
+    }
     try {
       const res = await fetch('/api/auth/login', {
         method: 'POST',
@@ -21,11 +41,14 @@ export default function Login() {
         },
         body: JSON.stringify(formData),
       });
-
       const data = await res.json();
-
       if (res.ok) {
-        router.push('/admin/dashboard');
+        window.dispatchEvent(new Event('authChanged'));
+        if (data.user && (data.user.role === 'admin' || data.user.role === 'editor' || data.user.role === 'author')) {
+          router.push('/admin/dashboard');
+        } else {
+          router.push('/dashboard');
+        }
       } else {
         setError(data.message);
       }
@@ -39,7 +62,7 @@ export default function Login() {
       <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow">
         <div>
           <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Admin Login
+            Login
           </h2>
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
@@ -80,6 +103,9 @@ export default function Login() {
                   password: e.target.value
                 }))}
               />
+              <div className="mt-2 text-right">
+                <Link href="/forgot-password" className="text-blue-600 hover:underline text-sm">Forgot password?</Link>
+              </div>
             </div>
           </div>
 
@@ -90,6 +116,10 @@ export default function Login() {
             >
               Sign in
             </button>
+            <div className="mt-4 text-center">
+              <span className="text-gray-600">Don't have an account?</span>
+              <a href="/register" className="ml-2 text-blue-600 hover:underline">Register</a>
+            </div>
           </div>
         </form>
       </div>

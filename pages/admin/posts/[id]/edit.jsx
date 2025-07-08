@@ -9,8 +9,13 @@ export default function EditPost({ post, categories, tags: initialTags }) {
   const [formData, setFormData] = useState({
     title: '',
     content: '',
+    excerpt: '',
     category_id: '',
+    author: '',
+    featured_image: '',
     published: false,
+    scheduled_for: '',
+    status: 'draft',
   });
   const [selectedTags, setSelectedTags] = useState([]);
   const [availableTags, setAvailableTags] = useState(initialTags || []);
@@ -23,8 +28,13 @@ export default function EditPost({ post, categories, tags: initialTags }) {
       setFormData({
         title: post.title || '',
         content: post.content || '',
+        excerpt: post.excerpt || '',
         category_id: post.category_id || '',
+        author: post.author || '',
+        featured_image: post.featured_image || '',
         published: post.published || false,
+        scheduled_for: post.scheduled_for || '',
+        status: post.status || 'draft',
       });
       setSelectedTags(post.tags || []);
     }
@@ -41,10 +51,22 @@ export default function EditPost({ post, categories, tags: initialTags }) {
     setError('');
 
     try {
-      const res = await fetch(`/api/posts/${post.id}`, {
+      const res = await fetch(`/api/admin/posts`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ ...formData, tags: selectedTags }),
+        body: JSON.stringify({
+          id: post.id,
+          title: formData.title,
+          content: formData.content,
+          excerpt: formData.excerpt || '',
+          category_id: Number(formData.category_id),
+          author: formData.author || '',
+          featured_image: formData.featured_image || '',
+          published: !!formData.published,
+          scheduled_for: formData.scheduled_for || null,
+          status: formData.status || 'draft',
+          tags: selectedTags
+        }),
       });
 
       if (!res.ok) throw new Error('Failed to update post');
@@ -78,6 +100,69 @@ export default function EditPost({ post, categories, tags: initialTags }) {
             />
           </div>
 
+          {/* Excerpt */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Excerpt</label>
+            <textarea
+              name="excerpt"
+              value={formData.excerpt}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+              rows={3}
+            />
+          </div>
+
+          {/* Author */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Author</label>
+            <input
+              type="text"
+              name="author"
+              value={formData.author}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Featured Image */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Featured Image URL</label>
+            <input
+              type="text"
+              name="featured_image"
+              value={formData.featured_image}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Scheduled For */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Scheduled For</label>
+            <input
+              type="datetime-local"
+              name="scheduled_for"
+              value={formData.scheduled_for}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            />
+          </div>
+
+          {/* Status */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700">Status</label>
+            <select
+              name="status"
+              value={formData.status}
+              onChange={handleChange}
+              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+            >
+              <option value="draft">Draft</option>
+              <option value="published">Published</option>
+              <option value="scheduled">Scheduled</option>
+            </select>
+          </div>
+
           {/* Content */}
           <div>
             <label className="block text-sm font-medium text-gray-700">Content</label>
@@ -98,18 +183,6 @@ export default function EditPost({ post, categories, tags: initialTags }) {
                 <option key={category.id} value={category.id}>{category.name}</option>
               ))}
             </select>
-          </div>
-
-          {/* Published Checkbox */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              id="published"
-              checked={formData.published}
-              onChange={(e) => setFormData({ ...formData, published: e.target.checked })}
-              className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
-            />
-            <label htmlFor="published" className="ml-2 block text-sm text-gray-900">Published</label>
           </div>
 
           {/* Tags */}

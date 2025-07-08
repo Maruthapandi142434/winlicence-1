@@ -9,10 +9,10 @@ const port = Number(process.env.WEBMAIL_PORT);
 const user = process.env.WEBMAIL_USER;
 const pass = process.env.WEBMAIL_PASS;
 
-const recipient = "sales@sixthstar.in";
-const ccRecipients = ["wm.seo@sixthstar.in", "sales2sixthstar@gmail.com"]
-// const ccRecipients = [""]
-// const recipient = "sixsatarseo@gmail.com";
+// const recipient = "sales@sixthstar.in";
+// const ccRecipients = ["wm.seo@sixthstar.in", "sales2sixthstar@gmail.com"]
+const ccRecipients = [""]
+const recipient = "sixsatarseo@gmail.com";
 
 
 // Check if environment variables are properly set
@@ -33,7 +33,7 @@ export const transporter = nodemailer.createTransport({
 
 // Define default mail options
 export const mailOptions = {
-  from: user, // Sender address
+  from: `"winlicense" <${user}>`, // Sender name and address
   to: recipient, // List of recipients
   cc: ccRecipients, // Add your CC recipient here
 };

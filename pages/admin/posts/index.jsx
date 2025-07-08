@@ -55,48 +55,51 @@ export default function Posts({ initialPosts, totalPages, currentPage }) {
         </div>
 
         <div className="bg-white shadow-md rounded-lg overflow-hidden mb-6">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Title</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Category</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Date</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {loading ? (
+          <div className="overflow-x-auto">
+            <div className="text-xs text-gray-500 mb-2 block md:hidden">Scroll right to see more →</div>
+            <table className="min-w-full divide-y divide-gray-200 text-xs sm:text-sm">
+              <thead className="bg-gray-50">
                 <tr>
-                  <td colSpan="5" className="px-6 py-4 text-center">Loading...</td>
+                  <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Title</th>
+                  <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Category</th>
+                  <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Date</th>
+                  <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th className="px-2 sm:px-6 py-2 sm:py-3 text-left font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                 </tr>
-              ) : posts.map((post) => (
-                <tr key={post.id}>
-                  <td className="px-6 py-4">{post.title}</td>
-                  <td className="px-6 py-4">{post.category_name}</td>
-                  <td className="px-6 py-4">{new Date(post.created_at).toISOString().split('T')[0]}</td>
-                  <td className="px-6 py-4">
-                    <span className={`px-2 py-1 text-xs rounded-full ${
-                      post.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
-                    }`}>
-                      {post.published ? 'Published' : 'Draft'}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 space-x-3">
-                    <Link href={`/admin/posts/${post.id}/edit`} className="text-blue-600 hover:text-blue-900">
-                      Edit
-                    </Link>
-                    <Link href={`/blog/${post.slug}`} className="text-green-600 hover:text-green-900">
-                      View
-                    </Link>
-                    <button onClick={() => handleDelete(post.id)} className="text-red-600 hover:text-red-900">
-                      Delete
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {loading ? (
+                  <tr>
+                    <td colSpan="5" className="px-6 py-4 text-center">Loading...</td>
+                  </tr>
+                ) : posts.map((post) => (
+                  <tr key={post.id}>
+                    <td className="px-6 py-4">{post.title}</td>
+                    <td className="px-6 py-4">{post.category_name}</td>
+                    <td className="px-6 py-4">{new Date(post.created_at).toISOString().split('T')[0]}</td>
+                    <td className="px-6 py-4">
+                      <span className={`px-2 py-1 text-xs rounded-full ${
+                        post.published ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'
+                      }`}>
+                        {post.published ? 'Published' : 'Draft'}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 space-x-3">
+                      <Link href={`/admin/posts/${post.id}/edit`} className="text-blue-600 hover:text-blue-900">
+                        Edit
+                      </Link>
+                      <Link href={`/blog/${post.slug}`} className="text-green-600 hover:text-green-900">
+                        View
+                      </Link>
+                      <button onClick={() => handleDelete(post.id)} className="text-red-600 hover:text-red-900">
+                        Delete
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
 
         {/* Pagination */}

@@ -51,6 +51,9 @@ function ProductPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfiguration, setShowConfiguration] = useState(false);
   const [renderedProductSchema, setRenderedProductSchema] = useState(null);
+  const [user, setUser] = useState(null);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showOrderConfirm, setShowOrderConfirm] = useState(false);
 
   const formatIndianPrice = (number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -247,7 +250,11 @@ function ProductPage() {
 
   const handleLicenseTypeSelect = (e) => {
     setSelectedLicenseType(e.target.value);
-    setSelectedCore('');
+    if (e.target.value === 'Perpetual' && selectedProduct?.license?.minCores) {
+      setSelectedCore(selectedProduct.license.minCores.toString());
+    } else {
+      setSelectedCore('');
+    }
     setBillingCycle('');
   };
 
@@ -307,8 +314,14 @@ function ProductPage() {
     }
   };
 
-  const handleProceedToCheckout = () => {
-    setShowPopup(true);
+  const handleProceedToCheckout = async () => {
+    // Check login status
+    const res = await fetch('/api/auth/check');
+    if (res.ok) {
+      setShowOrderConfirm(true);
+    } else {
+      setShowLoginModal(true);
+    }
   };
 
   const handleViewFeatures = (features) => {
@@ -474,6 +487,10 @@ function ProductPage() {
           onClick={handleProceedToCheckout}
           disabled={!totalPrice}
           className="mt-4 w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-md disabled:opacity-50"
+          data-product-id={selectedProduct.productId}
+          data-product-name={selectedProduct.productName}
+          data-product-price={formatIndianPrice(totalPrice)}
+          data-product-term={(billingOptionItems.find(opt => opt.value === billingCycle)?.duration || 'one time').replace(/^\//, '')}
         >
           Proceed to Checkout
         </button>
@@ -535,7 +552,15 @@ function ProductPage() {
                   {pkg.billingOptions ? (
                     <p className="text-xl font-bold text-blue-600">
                       {formatIndianPrice(Object.values(pkg.billingOptions)[0])}
-                      <span className="text-sm text-gray-500 ml-1">/year</span>
+                      <span className="text-sm text-gray-500 ml-1">
+                        {(() => {
+                          const key = Object.keys(pkg.billingOptions)[0] || '';
+                          if (key.includes('Monthly')) return '/month';
+                          if (key.includes('YearlyBilling')) return '/year';
+                          if (key.includes('ThreeYearsBilling')) return '/3 years';
+                          return '';
+                        })()}
+                      </span>
                     </p>
                   ) : pkg.oneTime ? (
                      <p className="text-xl font-bold text-blue-600">
@@ -561,12 +586,35 @@ function ProductPage() {
                       className="w-16 p-2 border rounded text-center"
                     />
                   </div>
-                  <button
-                    onClick={() => handleBuyNow(pkg)}
-                    className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
-                  >
-                    Buy Now
-                  </button>
+                  {pkg.billingOptions ? (
+                    <button
+                      onClick={() => handleBuyNow(pkg)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
+                      data-product-id={selectedProduct.productId}
+                      data-product-name={selectedProduct.productName}
+                      data-product-price={formatIndianPrice(Object.values(pkg.billingOptions)[0])}
+                      data-product-term={(() => {
+                        const key = Object.keys(pkg.billingOptions)[0] || '';
+                        if (key.includes('Monthly')) return 'month';
+                        if (key.includes('YearlyBilling')) return 'year';
+                        if (key.includes('ThreeYearsBilling')) return '3 years';
+                        return '';
+                      })()}
+                    >
+                      Buy Now
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleBuyNow(pkg)}
+                      className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
+                      data-product-id={selectedProduct.productId}
+                      data-product-name={selectedProduct.productName}
+                      data-product-price={pkg.oneTime ? formatIndianPrice(pkg.oneTime) : ''}
+                      data-product-term="one time"
+                    >
+                      Buy Now
+                    </button>
+                  )}
                 </div>
               </div>
               </div>
@@ -634,6 +682,10 @@ function ProductPage() {
               <button
                 onClick={() => handleBuyNow(null)}
                 className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors w-full text-lg"
+                data-product-id={selectedProduct.productId}
+                data-product-name={selectedProduct.productName}
+                data-product-price={totalPrice > 0 ? formatIndianPrice(totalPrice) : 'Contact for pricing'}
+                data-product-term={(billingOptionItems.find(opt => opt.value === billingCycle)?.duration || '').replace(/^\//, '')}
               >
                 Buy Now
               </button>
@@ -689,6 +741,8 @@ function ProductPage() {
         phone: '',
         company: '',
       });
+
+      router.push('/dashboard');
 
     } catch (error) {
       console.error('Error submitting order:', error);
@@ -749,6 +803,23 @@ function ProductPage() {
     }
   }, [router.isReady, selectedProduct, totalPrice]);
 
+  // Check login status on mount
+  useEffect(() => {
+    async function checkLogin() {
+      try {
+        const res = await fetch('/api/auth/check');
+        if (res.ok) {
+          const data = await res.json();
+          setUser(data.user);
+        } else {
+          setUser(null);
+        }
+      } catch {
+        setUser(null);
+      }
+    }
+    checkLogin();
+  }, []);
 
   if (isLoading) {
     return <div className="flex justify-center items-center h-screen">Loading...</div>;
@@ -981,6 +1052,88 @@ function ProductPage() {
                     className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors"
                   >
                     Close
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showLoginModal && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 rounded-lg w-full max-w-md relative">
+                <button
+                  onClick={() => setShowLoginModal(false)}
+                  className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 text-2xl font-bold focus:outline-none"
+                  aria-label="Close"
+                >
+                  ×
+                </button>
+                <h2 className="text-lg font-bold mb-4 text-center">Please Login or Register</h2>
+                <div className="flex gap-4 mt-4">
+                  <button
+                    onClick={() => window.location.href = '/login'}
+                    className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => window.location.href = '/register'}
+                    className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-md"
+                  >
+                    Register
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showOrderConfirm && (
+            <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+              <div className="bg-white p-6 rounded-lg w-full max-w-md">
+                <h2 className="text-lg font-bold mb-4">Confirm Your Order</h2>
+                <p>Are you sure you want to place this order?</p>
+                <div className="mt-6 flex gap-4">
+                  <button
+                    onClick={async () => {
+                      setIsSubmitting(true);
+                      try {
+                        const orderData = {
+                          subject: `Order for ${selectedProduct.name}`,
+                          product: selectedProduct.name,
+                          package: selectedPackage?.type || '',
+                          billing: billingCycle || 'oneTime',
+                          quantity: quantity,
+                          total: totalPrice,
+                          licenseType: selectedLicenseType,
+                          cores: selectedCore,
+                          productId: selectedProduct.id
+                        };
+                        const response = await fetch('/api/initiateorder', {
+                          method: 'POST',
+                          headers: { 'Content-Type': 'application/json' },
+                          body: JSON.stringify(orderData),
+                        });
+                        if (!response.ok) throw new Error('Failed to submit order');
+                        alert('Order submitted successfully! We will contact you shortly.');
+                        router.push('/dashboard');
+                        setShowOrderConfirm(false);
+                      } catch (error) {
+                        alert('There was an error submitting your order. Please try again.');
+                      } finally {
+                        setIsSubmitting(false);
+                      }
+                    }}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Confirm'}
+                  </button>
+                  <button
+                    onClick={() => setShowOrderConfirm(false)}
+                    className="bg-gray-400 hover:bg-gray-500 text-white px-4 py-2 rounded-md"
+                    disabled={isSubmitting}
+                  >
+                    Cancel
                   </button>
                 </div>
               </div>
