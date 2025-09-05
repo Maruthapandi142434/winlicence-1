@@ -7,7 +7,10 @@ import CategorySidebar from '../../../components/CategorySidebar';
 import MetaTags from "../../../components/MetaTags"; // Removed to prevent conflicts
 import Head from 'next/head';
 import { organizations, productcategorySchema } from "../../../lib/data/schema";
-
+import ContactFormModal from '../../../components/ContactFormModal';
+import { contactProduct } from '../../../lib/api';
+import { toast } from 'react-toastify'; // Import toast
+import 'react-toastify/dist/ReactToastify.css';
 const PRODUCTS_PER_PAGE = 12;
 
 function CategoryPage() {
@@ -18,7 +21,15 @@ function CategoryPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedProducts, setExpandedProducts] = useState({});
   const [renderedCategorySchema, setRenderedCategorySchema] = useState(null);
-
+    const [showContactForm, setShowContactForm] = useState(false);
+    const [selectedProductForContact, setSelectedProductForContact] = useState(null);
+      const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submissionMessage, setSubmissionMessage] = useState(null);
+ const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [CompanyName, setCompanyName] = useState('');
+    const [message, setMessage] = useState('');
   // Toggle function for expanding/collapsing features
   const toggleFeatures = (productId) => {
     setExpandedProducts(prev => ({
@@ -116,6 +127,81 @@ function CategoryPage() {
     );
   }
 
+
+  const handleContactUsClick = (product) => {
+    setSelectedProductForContact(product);
+    setShowContactForm(true);
+  };
+
+  const handleCloseContactForm = () => {
+    setShowContactForm(false);
+    setSelectedProductForContact(null);
+    // Clear form fields when closing the modal
+    setName('');
+    setEmail('');
+    setPhone('');
+    setCompanyName('');
+    setMessage('');
+  };
+
+ const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+      const { price, cycle } = getProductPrice(selectedProductForContact);
+
+    const formData = {
+      name,
+      email,
+      phone,
+      company: CompanyName,
+      message,
+      subject: {
+        title: selectedProductForContact?.name || 'N/A',
+        price :price,
+        description: selectedProductForContact?.description || 'N/A',
+        category: selectedProductForContact?.category || 'N/A',
+        
+      },
+    };
+
+    try {
+      await contactProduct(formData);
+      console.log('Form submitted successfully!');
+      toast.success('Your message has been sent!', { // Show success toast
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      handleCloseContactForm();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to send message. Please try again.', { // Show error toast
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+
+
+
+
+
+
+
+
+
   return (
     <div>
       <MetaTags />
@@ -195,6 +281,11 @@ function CategoryPage() {
                     
                     return (
                       <div key={product.id} className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition-shadow duration-300">
+                        <Link
+                                href={`/product/${product.slug}`}
+                                passHref
+                                legacyBehavior
+                              >
                         <div className="p-6 flex flex-col h-full justify-around">
                           <div className="flex flex-col items-center text-center mb-2">
                             <img 
@@ -214,7 +305,7 @@ function CategoryPage() {
                                 </p>
                               </div>
                               <div>
-                                <Link 
+                                {/* <Link 
                                   href={`/product/${product.slug}`}
                                   passHref
                                   legacyBehavior
@@ -230,14 +321,15 @@ function CategoryPage() {
                                   >
                                     Buy Now
                                   </button>
-                                </Link>
+                                </Link> */}
+                                
                               </div>
                             </div>
                             <p className="text-black text-xl mb-2 w-full font-bold text-center">{product.category} - {product.Year}</p>
                           </div>
                           
                           <div className="mb-4">
-                            <ul className="space-y-2">
+                            {/* <ul className="space-y-2">
                               {product.features?.slice(0, isExpanded ? product.features.length : 3).map((feature, index) => (
                                 <li key={index} className="flex items-start">
                                   <i className="fa-solid fa-check text-green-500 mr-2 mt-1"></i>
@@ -252,10 +344,19 @@ function CategoryPage() {
                               >
                                 {isExpanded ? 'Show less' : `+ ${product.features.length - 3} more features`}
                               </button>
-                            )}
+                            )} */}
+
+<button
+                                  className="bg-blue-600 w-full hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors  text-lg"
+                                  onClick={() => handleContactUsClick(product)}
+                                >
+                                  Contact Us
+                                </button>
                           </div>
                         </div>
+                        </Link>
                       </div>
+                      
                     );
                   })}
                 </div>
@@ -295,6 +396,30 @@ function CategoryPage() {
                 )}
               </>
             )}
+
+ {showContactForm && selectedProductForContact && (
+        <ContactFormModal
+          show={showContactForm}
+          onClose={handleCloseContactForm}
+          selectedProduct={selectedProductForContact}
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
+          phone={phone}
+          setPhone={setPhone}
+          CompanyName={CompanyName}
+          setCompanyName={setCompanyName}
+          message={message}
+          setMessage={setMessage}
+          isSubmitting={isSubmitting}
+         
+          handleSubmit={handleSubmit}
+        />
+      )}
+
+
+
           </div>
         </div>
       </div>

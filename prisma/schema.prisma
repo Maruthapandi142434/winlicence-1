@@ -8,6 +8,166 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model AdminUser {
+  id        Int       @id @default(autoincrement())
+  username  String    @unique(map: "username") @db.VarChar(50)
+  email     String    @unique(map: "email") @db.VarChar(255)
+  password  String    @db.VarChar(255)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  role      UserRole? @default(author)
+
+  @@map("admin_users")
+}
+
+model BlogCategory {
+  id        Int        @id @default(autoincrement())
+  name      String     @unique(map: "name") @db.VarChar(100)
+  slug      String     @unique(map: "slug") @db.VarChar(100)
+  createdAt DateTime   @default(now()) @map("created_at") @db.Timestamp(0)
+  posts     BlogPost[]
+
+  @@map("blog_categories")
+}
+
+model BlogPost {
+  id            Int           @id @default(autoincrement())
+  title         String        @db.VarChar(255)
+  slug          String        @unique(map: "slug") @db.VarChar(255)
+  excerpt       String?       @db.Text
+  content       String?       @db.LongText
+  category      String?       @db.VarChar(100)
+  featuredImage String?       @map("featured_image") @db.VarChar(255)
+  author        String?       @db.VarChar(100)
+  published     Boolean?      @default(false)
+  createdAt     DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt     DateTime      @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+  scheduledFor  DateTime?     @map("scheduled_for") @db.DateTime(0)
+  status        BlogStatus?   @default(draft)
+  categoryId    Int?          @map("category_id")
+  blogPostTags  BlogPostTag[]
+  categoryRel   BlogCategory? @relation(fields: [categoryId], references: [id], onUpdate: Restrict, map: "fk_category")
+  post_tags     PostTag[]
+
+  @@index([category], map: "category")
+  @@index([categoryId], map: "fk_category")
+  @@index([slug], map: "slug_2")
+  @@map("blog_posts")
+}
+
+model BlogTag {
+  id           Int           @id @default(autoincrement())
+  name         String        @unique(map: "name") @db.VarChar(50)
+  slug         String        @unique(map: "slug") @db.VarChar(50)
+  createdAt    DateTime      @default(now()) @map("created_at") @db.Timestamp(0)
+  blogPostTags BlogPostTag[]
+  post_tags    PostTag[]
+
+  @@map("blog_tags")
+}
+
+model BlogPostTag {
+  id     Int      @id @default(autoincrement())
+  postId Int      @map("post_id")
+  tagId  Int      @map("tag_id")
+  post   BlogPost @relation(fields: [postId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "blog_post_tags_ibfk_1")
+  tag    BlogTag  @relation(fields: [tagId], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "blog_post_tags_ibfk_2")
+
+  @@index([postId], map: "post_id")
+  @@index([tagId], map: "tag_id")
+  @@map("blog_post_tags")
+}
+
+model PostTag {
+  post_id    Int
+  tag_id     Int
+  blog_posts BlogPost @relation(fields: [post_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "post_tags_ibfk_1")
+  blog_tags  BlogTag  @relation(fields: [tag_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "post_tags_ibfk_2")
+
+  @@id([post_id, tag_id])
+  @@index([tag_id], map: "tag_id")
+  @@map("post_tags")
+}
+
+model InitiatedOrder {
+  id          Int      @id @default(autoincrement())
+  name        String?  @db.VarChar(100)
+  email       String?  @db.VarChar(100)
+  phone       String?  @db.VarChar(20)
+  company     String?  @db.VarChar(100)
+  subject     String?  @db.VarChar(255)
+  product     String?  @db.VarChar(100)
+  package     String?  @db.VarChar(100)
+  billing     String?  @db.VarChar(50)
+  quantity    Int?
+  total       Decimal? @db.Decimal(10, 2)
+  licenseType String?  @map("license_type") @db.VarChar(50)
+  cores       String?  @db.VarChar(20)
+  productId   Int?     @map("product_id")
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamp(0)
+
+  @@map("initiated_orders")
+}
+
+model PageMetadata {
+  id                  Int       @id @default(autoincrement())
+  pageSlug            String    @unique(map: "page_slug") @map("page_slug") @db.VarChar(255)
+  title               String    @db.VarChar(255)
+  description         String    @db.Text
+  canonicalUrl        String?   @map("canonical_url") @db.VarChar(255)
+  ogTitle             String?   @map("og_title") @db.VarChar(255)
+  ogDescription       String?   @map("og_description") @db.Text
+  ogImage             String?   @map("og_image") @db.VarChar(255)
+  ogUrl               String?   @map("og_url") @db.VarChar(255)
+  articleModifiedTime DateTime? @map("article_modified_time") @db.DateTime(0)
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt           DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@map("page_metadata")
+}
+
+model Permission {
+  id               Int              @id @default(autoincrement())
+  name             String           @unique(map: "name") @db.VarChar(50)
+  description      String?          @db.Text
+  role_permissions RolePermission[]
+
+  @@map("permissions")
+}
+
+model RolePermission {
+  role          Role       @map("role")
+  permission_id Int
+  permissions   Permission @relation(fields: [permission_id], references: [id], onDelete: Cascade, onUpdate: Restrict, map: "role_permissions_ibfk_1")
+
+  @@id([role, permission_id])
+  @@index([permission_id], map: "permission_id")
+  @@map("role_permissions")
+}
+
+model ProductSchema {
+  id                    Int       @id @default(autoincrement())
+  slug                  String    @unique(map: "slug") @db.VarChar(255)
+  name                  String    @db.VarChar(255)
+  imageUrl              String?   @map("image_url") @db.VarChar(255)
+  description           String?   @db.Text
+  category              String?   @db.VarChar(100)
+  year                  String?   @db.VarChar(20)
+  features              String?   @db.LongText
+  schemaBrand           String?   @default("Microsoft") @map("schema_brand") @db.VarChar(100)
+  schemaSku             String?   @map("schema_sku") @db.VarChar(100)
+  schemaPrice           Decimal?  @map("schema_price") @db.Decimal(10, 2)
+  schemaPriceCurrency   String?   @default("INR") @map("schema_price_currency") @db.VarChar(10)
+  schemaPriceValidUntil DateTime? @map("schema_price_valid_until") @db.Date
+  isActive              Boolean?  @default(true) @map("is_active")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamp(0)
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamp(0)
+
+  @@index([category], map: "category")
+  @@index([schemaSku], map: "schema_sku")
+  @@index([slug], map: "slug_2")
+  @@map("product_schema")
+}
+
 enum BlogStatus {
   draft
   published
@@ -20,205 +180,8 @@ enum UserRole {
   author
 }
 
-model AdminUser {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique @db.VarChar(50)
-  email     String   @unique @db.VarChar(255)
-  password  String   @db.VarChar(255)
-  createdAt DateTime @default(now()) @map("created_at")
-  role      UserRole @default(author)
-
-  @@map("admin_users")
-}
-
-model BlogCategory {
-  id        Int         @id @default(autoincrement())
-  name      String      @unique @db.VarChar(100)
-  slug      String      @unique @db.VarChar(100)
-  createdAt DateTime    @default(now()) @map("created_at")
-  posts     BlogPost[]
-
-  @@map("blog_categories")
-}
-
-model BlogPost {
-  id            Int           @id @default(autoincrement())
-  title         String        @db.VarChar(255)
-  slug          String        @unique @db.VarChar(255)
-  excerpt       String?       @db.Text
-  content       String?       @db.LongText
-  category      String?       @db.VarChar(100)
-  featuredImage String?       @map("featured_image") @db.VarChar(255)
-  author        String?       @db.VarChar(100)
-  published     Boolean       @default(false)
-  createdAt     DateTime      @default(now()) @map("created_at")
-  updatedAt     DateTime      @updatedAt @map("updated_at")
-  scheduledFor  DateTime?     @map("scheduled_for")
-  status        BlogStatus    @default(draft)
-  categoryId    Int?          @map("category_id")
-  categoryRel   BlogCategory? @relation(fields: [categoryId], references: [id])
-  blogPostTags  BlogPostTag[]
-  postTags      PostTag[]
-
-  @@map("blog_posts")
-}
-
-model BlogTag {
-  id        Int           @id @default(autoincrement())
-  name      String        @unique @db.VarChar(50)
-  slug      String        @unique @db.VarChar(50)
-  createdAt DateTime      @default(now()) @map("created_at")
-  blogPostTags BlogPostTag[]
-  postTags      PostTag[]
-
-  @@map("blog_tags")
-}
-
-model BlogPostTag {
-  id     Int      @id @default(autoincrement())
-  post   BlogPost @relation(fields: [postId], references: [id])
-  postId Int @map("post_id")
-  tag    BlogTag  @relation(fields: [tagId], references: [id])
-  tagId  Int @map("tag_id")
-
-  @@map("blog_post_tags")
-}
-
-model PostTag {
-  post   BlogPost @relation(fields: [postId], references: [id])
-  postId Int
-  tag    BlogTag  @relation(fields: [tagId], references: [id])
-  tagId  Int
-
-  @@id([postId, tagId])
-  @@map("post_tags")
-}
-
-model User {
-  id        Int      @id @default(autoincrement())
-  username  String   @unique
-  email     String   @unique
-  password  String
-  createdAt DateTime @default(now())
-  orders    InitiatedOrder[]
-  name      String?
-  mobile    String?
-  company   String?
-
-  @@map("user")
-}
-
-enum OrderStatus {
-  PENDING
-  PROCESSING
-  ACTIVE
-  COMPLETED
-  CANCELLED
-}
-
-enum PaymentStatus {
-  PENDING
-  PAID
-  FAILED
-}
-
-model InitiatedOrder {
-  id         Int      @id @default(autoincrement())
-  name       String?  @db.VarChar(100)
-  email      String?  @db.VarChar(100)
-  phone      String?  @db.VarChar(20)
-  company    String?  @db.VarChar(100)
-  subject    String?  @db.VarChar(255)
-  product    String?  @db.VarChar(100)
-  package    String?  @db.VarChar(100)
-  billing    String?  @db.VarChar(50)
-  quantity   Int?
-  total      Decimal? @db.Decimal(10,2)
-  licenseType String? @map("license_type") @db.VarChar(50)
-  cores      String?  @db.VarChar(20)
-  productId  Int?     @map("product_id")
-  createdAt  DateTime @default(now()) @map("created_at")
-  userId     Int?
-  user       User?    @relation(fields: [userId], references: [id])
-  status     OrderStatus @default(PENDING)
-  purchasedAt DateTime?
-  renewalAt   DateTime?
-  paymentStatus PaymentStatus @default(PENDING)
-
-  @@map("initiated_orders")
-}
-
-model PageMetadata {
-  id                  Int      @id @default(autoincrement())
-  pageSlug            String   @map("page_slug") @db.VarChar(255)
-  title               String   @db.VarChar(255)
-  description         String   @db.Text
-  canonicalUrl        String?  @map("canonical_url") @db.VarChar(255)
-  ogTitle             String?  @map("og_title") @db.VarChar(255)
-  ogDescription       String?  @map("og_description") @db.Text
-  ogImage             String?  @map("og_image") @db.VarChar(255)
-  ogUrl               String?  @map("og_url") @db.VarChar(255)
-  articleModifiedTime DateTime? @map("article_modified_time")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-
-  @@unique([pageSlug])
-  @@map("page_metadata")
-}
-
-model Permission {
-  id          Int      @id @default(autoincrement())
-  name        String   @unique @db.VarChar(50)
-  description String?  @db.Text
-  rolePermissions RolePermission[]
-
-  @@map("permissions")
-}
-
 enum Role {
   admin
   editor
   author
 }
-
-model RolePermission {
-  role         Role     @map("role")
-  permission   Permission @relation(fields: [permissionId], references: [id])
-  permissionId Int
-
-  @@id([role, permissionId])
-  @@map("role_permissions")
-}
-
-model ProductSchema {
-  id                  Int      @id @default(autoincrement())
-  slug                String   @unique @db.VarChar(255)
-  name                String   @db.VarChar(255)
-  imageUrl            String?  @map("image_url") @db.VarChar(255)
-  description         String?  @db.Text
-  category            String?  @db.VarChar(100)
-  year                String?  @db.VarChar(20)
-  features            Json?
-  schemaBrand         String?  @map("schema_brand") @db.VarChar(100)
-  schemaSku           String?  @map("schema_sku") @db.VarChar(100)
-  schemaPrice         Decimal? @map("schema_price") @db.Decimal(10,2)
-  schemaPriceCurrency String?  @map("schema_price_currency") @db.VarChar(10)
-  schemaPriceValidUntil DateTime? @map("schema_price_valid_until")
-  isActive            Boolean  @default(true) @map("is_active")
-  createdAt           DateTime @default(now()) @map("created_at")
-  updatedAt           DateTime @updatedAt @map("updated_at")
-
-  @@map("product_schema")
-}
-
-model EmailOTP {
-  id        Int      @id @default(autoincrement())
-  email     String
-  otp       String
-  type      String   // 'register' or 'reset'
-  expiresAt DateTime
-  used      Boolean  @default(false)
-  createdAt DateTime @default(now())
-
-  @@map("emailotp")
-} 

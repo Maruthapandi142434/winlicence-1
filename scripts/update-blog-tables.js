@@ -28,7 +28,6 @@ async function updateTables() {
       ADD COLUMN IF NOT EXISTS slug VARCHAR(255) NULL
     `);
 
-    console.log('Tables updated successfully');
     await connection.end();
   } catch (error) {
     console.error('Migration failed:', error);

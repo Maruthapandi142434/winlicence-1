@@ -52,6 +52,67 @@ module.exports = {
        destination: '/product/category/windows-server-2025-rds',
        permanent: true,
      },
+     {
+      source: '/faq.php',
+      destination: '/about/faq',
+      permanent: true,
+    },
+    {
+      source: '/blog.php',
+      destination: '/blog',
+      permanent: true,
+    },
+    {
+      source: '/cart.php',
+      destination: '/',
+      permanent: true,
+    },
+    {
+      source: '/testimonials.php',
+      destination: '/about/testimonials',
+      permanent: true,
+    },
+    {
+      source: '/products.php',
+      destination: '/product',
+      permanent: true,
+    },
+    {
+      source: '/contact.php',
+      destination: '/contact',
+      permanent: true,
+    },
+    {
+      source: '/index.php',
+      destination: '/',
+      permanent: true,
+    },
+    {
+      source: '/clients.php',
+      destination: '/clients',
+      permanent: true,
+    },
+    {
+      source: '/mission-vision.php',
+      destination: '/about/mission-vision',
+      permanent: true,
+    },
+    {
+      source: '/about/product',
+      destination: '/product',
+      permanent: true,
+    },
+    {
+      source: '/blog/[slug]',
+      destination: '/',
+      permanent: true,
+    },
+    {
+      source: '/blog/product',
+      destination: '/blog',
+      permanent: true,
+    },
+
     ];
   },
 };

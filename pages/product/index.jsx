@@ -7,6 +7,13 @@ import ProductSidebar from '../../components/ProductSidebar';
 import MetaTags from "../../components/MetaTags";
 import Head from 'next/head';
 import { organizations, productPageSchema } from "../../lib/data/schema"
+import { FaTimes } from 'react-icons/fa'; // Import close icon
+import ContactFormModal from '../../components/ContactFormModal';
+import { toast } from 'react-toastify'; // Import toast
+import 'react-toastify/dist/ReactToastify.css';
+import { useContactForm } from '../../lib/hooks/useContactForm';
+import { getDisplaySettings } from '../../lib/config/displayConfig';
+
 const PRODUCTS_PER_PAGE = 12;
 
 function ProductsList() {
@@ -16,7 +23,16 @@ function ProductsList() {
   const [selectedCategories, setSelectedCategories] = useState([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [expandedProducts, setExpandedProducts] = useState({});
-
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [selectedProductForContact, setSelectedProductForContact] = useState(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submissionMessage, setSubmissionMessage] = useState(null); // Can be a string (success or error) or null (no message)
+    // Modal form state
+    const [name, setName] = useState('');
+    const [email, setEmail] = useState('');
+    const [phone, setPhone] = useState('');
+    const [CompanyName, setCompanyName] = useState('');
+    const [message, setMessage] = useState('');
   // Toggle function for expanding/collapsing features
   const toggleFeatures = (productId) => {
     setExpandedProducts(prev => ({
@@ -27,15 +43,15 @@ function ProductsList() {
 
   // Filter products based on search term and selected categories
   const filteredProducts = products.filter(product => {
-    const matchesSearch = searchTerm 
-      ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = searchTerm
+      ? product.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         product.description.toLowerCase().includes(searchTerm.toLowerCase())
       : true;
-    
+
     const matchesCategories = selectedCategories.length > 0
       ? selectedCategories.includes(categories.find(c => c.name === product.category)?.slug)
       : true;
-    
+
     return matchesSearch && matchesCategories;
   });
 
@@ -69,6 +85,71 @@ function ProductsList() {
     setSearchTerm(term);
     setCurrentPage(1);
   };
+
+  const handleContactUsClick = (product) => {
+    setSelectedProductForContact(product);
+    setShowContactForm(true);
+  };
+
+  const handleCloseContactForm = () => {
+    setShowContactForm(false);
+    setSelectedProductForContact(null);
+    // Clear form fields when closing the modal
+    setName('');
+    setEmail('');
+    setPhone('');
+    setCompanyName('');
+    setMessage('');
+  };
+
+const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+      const { price, cycle } = getProductPrice(selectedProductForContact);
+
+    const formData = {
+      name,
+      email,
+      phone,
+      CompanyName,
+      message,
+      subject: {
+        title: selectedProductForContact?.name || 'N/A',
+        price :price,
+        description: selectedProductForContact?.description || 'N/A',
+        category: selectedProductForContact?.category || 'N/A',
+        
+      },
+    };
+
+    try {
+      await contactProduct(formData);
+      console.log('Form submitted successfully!');
+      toast.success('Your message has been sent!', { // Show success toast
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      handleCloseContactForm();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to send message. Please try again.', { // Show error toast
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
   return (
     <div>
       <Head>
@@ -89,34 +170,34 @@ function ProductsList() {
           </div>
         </div>
       </section>
-      
+
       <div className="about-section">
         <div className="about-header">
           <p>
-            <Link href="/">Home</Link> 
-            <i className="fa-solid fa-angles-right mx-2"></i> 
+            <Link href="/">Home</Link>
+            <i className="fa-solid fa-angles-right mx-2"></i>
             Products
           </p>
         </div>
       </div>
 
       <div className="flex flex-col lg:flex-row min-h-screen">
-        <ProductSidebar 
+        <ProductSidebar
           selectedCategories={selectedCategories}
           onCategoryToggle={handleCategoryToggle}
           searchTerm={searchTerm}
           onSearchChange={handleSearchChange}
           showCategoryFilters={true}
         />
-        
+
         <div className="flex-1 w-full product-list-sec md:p-8 bg-[#f7f9fb]">
           <div className="max-w-6xl mx-auto">
             <div className="mb-6 flex justify-between items-center">
               <h2 className="text-2xl font-bold text-gray-900">
-                {searchTerm 
+                {searchTerm
                   ? `Search results for "${searchTerm}"`
                   : selectedCategories.length > 0
-                    ? `${selectedCategories.map(slug => 
+                    ? `${selectedCategories.map(slug =>
                         categories.find(c => c.slug === slug)?.name).join(', ')} Products`
                     : 'All Products'}
               </h2>
@@ -128,11 +209,11 @@ function ProductsList() {
             {paginatedProducts.length === 0 ? (
               <div className="text-center py-12">
                 <p className="text-gray-600 text-lg">No products found matching your criteria.</p>
-                <button 
+                <button
                   onClick={() => {
                     setSelectedCategories([]);
                     setSearchTerm('');
-                  }} 
+                  }}
                   className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
                 >
                   Clear filters
@@ -144,21 +225,26 @@ function ProductsList() {
                   {paginatedProducts.map((product) => {
                     const { price, cycle } = getProductPrice(product);
                     const isExpanded = expandedProducts[product.id];
-                    
+
                     return (
                       <div key={product.id} className="bg-[#f7f9fb] rounded-lg shadow-md overflow-hidden hover:shadow-lg hover:shadow-blue-500/50 transition-shadow duration-300">
-                        <div className="p-6 flex flex-col h-full justify-around">
-                          <div className="flex flex-col items-center text-center mb-2">
-                            <img 
-                              src={product.img} 
-                              alt={product.name} 
+                         <Link
+                                href={`/product/${product.slug}`}
+                                passHref
+                                legacyBehavior
+                              >
+                        <div className="p-6 flex flex-col h-full justify-around "   >
+                          <div className="flex flex-col items-center text-center mb-2 ">
+                            <img
+                              src={product.img}
+                              alt={product.name}
                               className="w-16 h-16 object-contain mb-4"
                               onError={(e) => {
                                 e.target.src = '/images/product-placeholder.png';
                               }}
                             />
                             <h3 className="text-2xl font-semibold text-black text-center w-full ">{product.name}</h3>
-                           
+
 <div className="pt-2 border-t border-gray-100 w-full">
                             <div className=" mb-4">
  <div>
@@ -166,15 +252,15 @@ function ProductsList() {
                                   {price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
                                   {price !== null && cycle && (
                                     <span className="text-sm text-gray-700 ml-1">
-                                      {cycle === '/month' ? '/month' : 
-                                       cycle === '/year' ? '/year' : 
+                                      {cycle === '/month' ? '/month' :
+                                       cycle === '/year' ? '/year' :
                                        cycle === '/3 years' ? '/3 years' :
                                        cycle === '/one-time' ? '/one-time' : ''}
                                     </span>
                                   )}
                                 </p>
                               </div>
-                              <Link 
+                            {/*  <Link
                                 href={`/product/${product.slug}`}
                                 passHref
                                 legacyBehavior
@@ -183,23 +269,24 @@ function ProductsList() {
                                 data-product-id={product.productId}
                                 data-product-name={product.productName}
                                 data-product-price={price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
-                                data-product-term= {cycle === '/month' ? 'month' : 
-                                  cycle === '/year' ? 'yearly' : 
+                                data-product-term= {cycle === '/month' ? 'month' :
+                                  cycle === '/year' ? 'yearly' :
                                   cycle === '/3 years' ? '3 years' :
                                   cycle === '/one-time' ? 'one-time' : ''}
                                 >
                                   Buy Now
                                 </button>
-                              </Link>
+                              </Link>*/}
+                              
                             </div>
-                            
+
                           </div>
 
                             <p className="text-black text-xl mb-2 w-full font-bold text-center">{product.category} - {product.Year}</p>
                           </div>
-                          
+
                           <div className="mb-4">
-                            <ul className="space-y-2">
+                            {/* <ul className="space-y-2">
                               {product.features?.slice(0, isExpanded ? product.features.length : 3).map((feature, index) => (
                                 <li key={index} className="flex items-start">
                                   <i className="fa-solid fa-check text-green-500 mr-2 mt-1"></i>
@@ -208,17 +295,25 @@ function ProductsList() {
                               ))}
                             </ul>
                             {product.features?.length > 3 && (
-                              <button 
+                              <button
                                 onClick={() => toggleFeatures(product.id)}
                                 className="text-blue-600 text-sm mt-2 hover:underline focus:outline-none"
                               >
                                 {isExpanded ? 'Show less' : `+ ${product.features.length - 3} more features`}
                               </button>
-                            )}
+                            )} */}
+ <button
+                                  className="bg-blue-600 w-full hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-colors  text-lg"
+                                  onClick={() => handleContactUsClick(product)}
+                                >
+                                  Contact Us
+                                </button>
+
                           </div>
-                          
+
 
                         </div>
+                        </Link>
                       </div>
                     );
                   })}
@@ -239,8 +334,8 @@ function ProductsList() {
                           key={page}
                           onClick={() => handlePageChange(page)}
                           className={`px-4 py-2 border-t border-b border-gray-300 ${
-                            currentPage === page 
-                              ? 'bg-blue-50 text-blue-600 font-medium' 
+                            currentPage === page
+                              ? 'bg-blue-50 text-blue-600 font-medium'
                               : 'bg-white text-gray-700 hover:bg-gray-50'
                           }`}
                         >
@@ -262,6 +357,29 @@ function ProductsList() {
           </div>
         </div>
       </div>
+
+   {showContactForm && selectedProductForContact && (
+        <ContactFormModal
+          show={showContactForm}
+          onClose={handleCloseContactForm}
+          selectedProduct={selectedProductForContact}
+          name={name}
+          setName={setName}
+          email={email}
+          setEmail={setEmail}
+          phone={phone}
+          setPhone={setPhone}
+          CompanyName={CompanyName}
+          setCompanyName={setCompanyName}
+          message={message}
+          setMessage={setMessage}
+          isSubmitting={isSubmitting}
+       
+          handleSubmit={handleSubmit}
+        />
+      )}
+
+
     </div>
   );
 }

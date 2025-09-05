@@ -9,10 +9,11 @@ const port = Number(process.env.WEBMAIL_PORT);
 const user = process.env.WEBMAIL_USER;
 const pass = process.env.WEBMAIL_PASS;
 
-// const recipient = "sales@sixthstar.in";
-// const ccRecipients = ["wm.seo@sixthstar.in", "sales2sixthstar@gmail.com"]
-const ccRecipients = [""]
-const recipient = "sixsatarseo@gmail.com";
+const recipient = "sales@sixthstar.in";
+// const recipient = "jrfsd2@sixthstar.in";
+const ccRecipients = ["wm.seo@sixthstar.in", "wm@sixthstar.in"]
+// const ccRecipients = ["jrfsd1@sixthstar.in"]
+// const recipient = "sixsatarseo@gmail.com";
 
 
 // Check if environment variables are properly set

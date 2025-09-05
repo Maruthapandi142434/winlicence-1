@@ -2,11 +2,17 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/router';
 import { products, categories } from '../../lib/data/products';
 import { getCustomizationOptions, getBillingOptions } from '../../lib/data/getCustomizationOptions';
+import { getProductPrice } from '../../lib/utils/productPrice';
+import { contactProduct } from '../../lib/api';
 import Link from 'next/link';
 import CategorySidebar from '../../components/CategorySidebar';
 // import MetaTags from "../../components/MetaTags"; // Removed to prevent conflicts
 import Head from 'next/head';
 import { organizations, productPageSchema } from "../../lib/data/schema";
+import ContactFormModal from '../../components/ContactFormModal';
+import { getDisplaySettings } from '../../lib/config/displayConfig';
+import { toast } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const DropdownSelect = ({ label, value, options, onChange, className = "" }) => {
   return (
@@ -48,12 +54,24 @@ function ProductPage() {
   });
   const [isLoading, setIsLoading] = useState(true);
   const [expandedProducts, setExpandedProducts] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showConfiguration, setShowConfiguration] = useState(false);
   const [renderedProductSchema, setRenderedProductSchema] = useState(null);
   const [user, setUser] = useState(null);
   const [showLoginModal, setShowLoginModal] = useState(false);
   const [showOrderConfirm, setShowOrderConfirm] = useState(false);
+
+  // Contact form state
+  const [showContactForm, setShowContactForm] = useState(false);
+  const [selectedProductForContact, setSelectedProductForContact] = useState(null);
+  const [isContactSubmitting, setIsContactSubmitting] = useState(false);
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
+  const [CompanyName, setCompanyName] = useState('');
+  const [message, setMessage] = useState('');
+  
+  // Get display settings
+  const displaySettings = getDisplaySettings('/product/[slug]');
 
   const formatIndianPrice = (number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -330,12 +348,27 @@ function ProductPage() {
   };
 
   const handleBuyNow = (pkg) => {
-    setSelectedPackage(pkg);
-    setShowConfiguration(true);
-    if (selectedProduct?.pricingModel === 'core-based') {
-      const firstBillingOption = customizationOptions.licenseTypes?.[selectedLicenseType]?.billingOptions?.yearlyCommitMonthlyBilling ? 'yearlyCommitMonthlyBilling' : Object.keys(customizationOptions.licenseTypes?.[selectedLicenseType]?.billingOptions || {})[0];
-      setBillingCycle(firstBillingOption);
+    // Gather configuration
+    const query = {
+      slug: selectedProduct.slug,
+      type: selectedLicenseType,
+      cores: selectedCore,
+      billing: billingCycle,
+      quantity: quantity
+    };
+    // If pkg is provided, use its type and billing options if available
+    if (pkg) {
+      query.type = selectedLicenseType || '';
+      query.cores = selectedCore || '';
+      if (pkg.billingOptions) {
+        const firstBilling = Object.keys(pkg.billingOptions)[0];
+        if (firstBilling) query.billing = firstBilling;
+      }
     }
+    // Remove undefined or empty values
+    Object.keys(query).forEach(key => (query[key] === undefined || query[key] === '') && delete query[key]);
+    const params = new URLSearchParams(query).toString();
+    router.push(`/checkout?${params}`);
   };
 
   const handleBack = () => {
@@ -360,6 +393,11 @@ function ProductPage() {
     const calculatedLicenses = billingOptions.calculatedLicenses || 0;
     const calculatedCores = billingOptions.calculatedCores || 0;
     const maxCores = customizationOptions?.maxCores || 10000000;
+
+    const handleContactUsClick = (product) => {
+      setSelectedProductForContact(product);
+      setShowContactForm(true);
+    };
     
     return (
       <div>
@@ -507,7 +545,7 @@ function ProductPage() {
           {selectedProduct.packages.map((pkg) => (
             <div key={pkg.type} className="bg-white ">
               <div className="row">
-                <div className='col-md-6 align-content-center bg-gray-50 bo'>
+                <div className='col-md-6 align-content-center bg-gray-100 bo  rounded'>
                 <img 
                     src={selectedProduct.productimg || selectedProduct.img} 
                     alt={selectedProduct.name} 
@@ -586,35 +624,44 @@ function ProductPage() {
                       className="w-16 p-2 border rounded text-center"
                     />
                   </div>
-                  {pkg.billingOptions ? (
+                  {displaySettings.showBuyNow ? (
+                    pkg.billingOptions && Object.keys(pkg.billingOptions).length > 0 ? (
+                      <button
+                        onClick={() => handleBuyNow(pkg)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
+                        data-product-id={selectedProduct.productId}
+                        data-product-name={selectedProduct.productName}
+                        data-product-price={formatIndianPrice(Object.values(pkg.billingOptions)[0])}
+                        data-product-term={(() => {
+                          const key = Object.keys(pkg.billingOptions)[0] || '';
+                          if (key.includes('Monthly')) return 'month';
+                          if (key.includes('YearlyBilling')) return 'year';
+                          if (key.includes('ThreeYearsBilling')) return '3 years';
+                          return '';
+                        })()}
+                      >
+                        Buy Now
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => handleBuyNow(pkg)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
+                        data-product-id={selectedProduct.productId}
+                        data-product-name={selectedProduct.productName}
+                        data-product-price={pkg.oneTime ? formatIndianPrice(pkg.oneTime) : ''}
+                        data-product-term="one time"
+                      >
+                        Buy Now
+                      </button>
+                    )
+                  ) : displaySettings.showContactUs ? (
                     <button
-                      onClick={() => handleBuyNow(pkg)}
+                      onClick={() => handleContactUsClick(selectedProduct)}
                       className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
-                      data-product-id={selectedProduct.productId}
-                      data-product-name={selectedProduct.productName}
-                      data-product-price={formatIndianPrice(Object.values(pkg.billingOptions)[0])}
-                      data-product-term={(() => {
-                        const key = Object.keys(pkg.billingOptions)[0] || '';
-                        if (key.includes('Monthly')) return 'month';
-                        if (key.includes('YearlyBilling')) return 'year';
-                        if (key.includes('ThreeYearsBilling')) return '3 years';
-                        return '';
-                      })()}
                     >
-                      Buy Now
+                      Contact Us
                     </button>
-                  ) : (
-                    <button
-                      onClick={() => handleBuyNow(pkg)}
-                      className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors"
-                      data-product-id={selectedProduct.productId}
-                      data-product-name={selectedProduct.productName}
-                      data-product-price={pkg.oneTime ? formatIndianPrice(pkg.oneTime) : ''}
-                      data-product-term="one time"
-                    >
-                      Buy Now
-                    </button>
-                  )}
+                  ) : null}
                 </div>
               </div>
               </div>
@@ -679,22 +726,96 @@ function ProductPage() {
             </div>
             
             <div className="flex justify-between mt-4 pt-4 border-t border-gray-100">
-              <button
-                onClick={() => handleBuyNow(null)}
-                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors w-full text-lg"
-                data-product-id={selectedProduct.productId}
-                data-product-name={selectedProduct.productName}
-                data-product-price={totalPrice > 0 ? formatIndianPrice(totalPrice) : 'Contact for pricing'}
-                data-product-term={(billingOptionItems.find(opt => opt.value === billingCycle)?.duration || '').replace(/^\//, '')}
-              >
-                Buy Now
-              </button>
+              {displaySettings.showBuyNow ? (
+                <button
+                  onClick={() => handleBuyNow(null)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors w-full text-lg"
+                  data-product-id={selectedProduct.productId}
+                  data-product-name={selectedProduct.productName}
+                  data-product-price={totalPrice > 0 ? formatIndianPrice(totalPrice) : 'Contact for pricing'}
+                  data-product-term={(billingOptionItems.find(opt => opt.value === billingCycle)?.duration || '').replace(/^\//, '')}
+                >
+                  Buy Now
+                </button>
+              ) : displaySettings.showContactUs ? (
+                <button
+                  onClick={() => handleContactUsClick(selectedProduct)}
+                  className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-colors w-full text-lg"
+                >
+                  Contact Us
+                </button>
+              ) : null}
             </div>
           </div>
           </div>
           
         </div>
       );
+    }
+  };
+
+  // Contact form handlers
+  const handleContactUsClick = (product) => {
+    setSelectedProductForContact(product);
+    setShowContactForm(true);
+  };
+
+  const handleCloseContactForm = () => {
+    setShowContactForm(false);
+    setSelectedProductForContact(null);
+    // Clear form fields when closing the modal
+    setName('');
+    setEmail('');
+    setPhone('');
+    setCompanyName('');
+    setMessage('');
+  };
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setIsContactSubmitting(true);
+    const { price, cycle } = getProductPrice(selectedProductForContact);
+
+    const formData = {
+      name,
+      email,
+      phone,
+      company: CompanyName,
+      message,
+      subject: {
+        title: selectedProductForContact?.name || 'N/A',
+        price: price,
+        description: selectedProductForContact?.description || 'N/A',
+        category: selectedProductForContact?.category || 'N/A',
+      },
+    };
+
+    try {
+      await contactProduct(formData);
+      console.log('Form submitted successfully!');
+      toast.success('Your message has been sent!', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+      handleCloseContactForm();
+    } catch (error) {
+      console.error('Error submitting form:', error);
+      toast.error('Failed to send message. Please try again.', {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+      });
+    } finally {
+      setIsContactSubmitting(false);
     }
   };
 
@@ -1138,6 +1259,83 @@ function ProductPage() {
                 </div>
               </div>
             </div>
+          )}
+
+          {/* Related Products Section */}
+          <div className="mt-8 pt-6 border-t border-gray-200">
+            <h4 className="text-xl font-bold text-gray-900 mb-4">Related Products</h4>
+            <div className="max-h-80 overflow-y-auto">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                {products
+                  .filter(product => 
+                    product.category === selectedProduct.category && 
+                    product.id !== selectedProduct.id
+                  )
+                  .slice(0, 12)
+                  .map((product) => {
+                    const { price, cycle } = getProductPrice(product);
+                    return (
+                      <Link
+                        key={product.id}
+                        href={`/product/${product.slug}`}
+                        className="block bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-blue-300 transition-all duration-200"
+                      >
+                        <div className="text-center">
+                          <img 
+                            src={product.img} 
+                            alt={product.name} 
+                            className="w-12 h-12 object-contain mx-auto mb-2"
+                            onError={(e) => {
+                              e.target.src = '/images/product-placeholder.png';
+                            }}
+                          />
+                          <h5 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
+                            {product.name}
+                          </h5>
+                          <p className="text-xs text-blue-600 font-bold">
+                            {price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
+                            {price !== null && cycle && (
+                              <span className="text-xs text-gray-500 ml-1">
+                                {cycle === '/month' ? '/mo' :
+                                 cycle === '/year' ? '/yr' :
+                                 cycle === '/3 years' ? '/3yr' :
+                                 cycle === '/one-time' ? '' : ''}
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                      </Link>
+                    );
+                  })}
+              </div>
+              {products.filter(product => 
+                product.category === selectedProduct.category && 
+                product.id !== selectedProduct.id
+              ).length === 0 && (
+                <p className="text-gray-500 text-center py-4">No related products found.</p>
+              )}
+            </div>
+          </div>
+
+          {/* Contact Form Modal */}
+          {showContactForm && selectedProductForContact && (
+            <ContactFormModal
+              show={showContactForm}
+              onClose={handleCloseContactForm}
+              selectedProduct={selectedProductForContact}
+              name={name}
+              setName={setName}
+              email={email}
+              setEmail={setEmail}
+              phone={phone}
+              setPhone={setPhone}
+              CompanyName={CompanyName}
+              setCompanyName={setCompanyName}
+              message={message}
+              setMessage={setMessage}
+              isSubmitting={isContactSubmitting}
+              handleSubmit={handleContactSubmit}
+            />
           )}
         </div>
       </div>
