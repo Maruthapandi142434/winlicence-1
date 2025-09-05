@@ -1261,11 +1261,104 @@ function ProductPage() {
             </div>
           )}
 
+          {/* Product Description Section */}
+          <div className="mt-8 bg-white border border-gray-200 rounded-lg p-6 shadow-sm">
+            <div className="mb-6">
+              <h3 className="text-xl font-bold text-gray-900 mb-4 border-b border-gray-200 pb-2">
+                Description
+              </h3>
+              <div className="prose prose-gray max-w-none">
+                <p className="text-gray-700 text-base leading-relaxed mb-4">
+                  {selectedProduct.description || `${selectedProduct.name} offers advanced features that improve security, performance, and flexibility. With cutting-edge technology and robust infrastructure capabilities, this solution provides a strong foundation for your business needs while introducing innovative enhancements to adapt to your requirements.`}
+                </p>
+                
+                {selectedProduct.longDescription && (
+                  <p className="text-gray-700 text-base leading-relaxed mb-4">
+                    {selectedProduct.longDescription}
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {selectedProduct.features && selectedProduct.features.length > 0 && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Key Features:</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {selectedProduct.features.map((feature, index) => (
+                    <div key={index} className="flex items-start space-x-3">
+                      <div className="flex-shrink-0 mt-1">
+                        <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+                      </div>
+                      <p className="text-gray-700 text-sm leading-relaxed">
+                        <span className="font-medium">{feature.split(':')[0]}:</span>
+                        {feature.includes(':') ? (
+                          <span className="ml-1">{feature.split(':').slice(1).join(':').trim()}</span>
+                        ) : (
+                          <span className="ml-1">{feature}</span>
+                        )}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {selectedProduct.specifications && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">Specifications:</h4>
+                <div className="bg-gray-50 rounded-lg p-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {Object.entries(selectedProduct.specifications).map(([key, value]) => (
+                      <div key={key} className="flex justify-between items-center py-2 border-b border-gray-200 last:border-b-0">
+                        <span className="font-medium text-gray-700 capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}:</span>
+                        <span className="text-gray-600">{value}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedProduct.requirements && (
+              <div className="mb-6">
+                <h4 className="text-lg font-semibold text-gray-900 mb-4">System Requirements:</h4>
+                <div className="bg-blue-50 rounded-lg p-4">
+                  <div className="space-y-2">
+                    {Array.isArray(selectedProduct.requirements) ? (
+                      selectedProduct.requirements.map((req, index) => (
+                        <div key={index} className="flex items-start space-x-2">
+                          <i className="fa-solid fa-check text-blue-600 mt-1 text-sm"></i>
+                          <span className="text-gray-700 text-sm">{req}</span>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-gray-700 text-sm">{selectedProduct.requirements}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {selectedProduct.category && (
+              <div className="text-sm text-gray-500 border-t border-gray-200 pt-4">
+                <p>
+                  For {selectedProduct.name} hardware requirements, check out the{' '}
+                  <Link href={`/product?category=${categories.find(c => c.name === selectedProduct.category)?.slug || ''}`} className="text-blue-600 hover:text-blue-800 underline">
+                    component requirements
+                  </Link>.
+                </p>
+              </div>
+            )}
+          </div>
+
           {/* Related Products Section */}
-          <div className="mt-8 pt-6 border-t border-gray-200">
-            <h4 className="text-xl font-bold text-gray-900 mb-4">Related Products</h4>
-            <div className="max-h-80 overflow-y-auto">
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="mt-12 pt-8 border-t border-gray-200">
+            <div className="text-center mb-8">
+              <h4 className="text-2xl font-bold text-gray-900 mb-2">You May Also Like</h4>
+              <p className="text-gray-600">Discover more products that might interest you</p>
+            </div>
+            <div className="max-h-96 overflow-y-auto">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 {products
                   .filter(product => 
                     product.category === selectedProduct.category && 
@@ -1275,36 +1368,65 @@ function ProductPage() {
                   .map((product) => {
                     const { price, cycle } = getProductPrice(product);
                     return (
-                      <Link
+                      <div
                         key={product.id}
-                        href={`/product/${product.slug}`}
-                        className="block bg-white border border-gray-200 rounded-lg p-3 hover:shadow-md hover:border-blue-300 transition-all duration-200"
+                        className="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg hover:border-blue-300 transition-all duration-300 transform hover:-translate-y-1 min-h-[280px] flex flex-col"
                       >
-                        <div className="text-center">
-                          <img 
-                            src={product.img} 
-                            alt={product.name} 
-                            className="w-12 h-12 object-contain mx-auto mb-2"
-                            onError={(e) => {
-                              e.target.src = '/images/product-placeholder.png';
-                            }}
-                          />
-                          <h5 className="text-sm font-semibold text-gray-900 mb-1 line-clamp-2">
+                        <div className="text-center flex-grow">
+                          <div className="mb-4">
+                            <img 
+                              src={product.img} 
+                              alt={product.name} 
+                              className="w-16 h-16 object-contain mx-auto"
+                              onError={(e) => {
+                                e.target.src = '/images/product-placeholder.png';
+                              }}
+                            />
+                          </div>
+                          <h5 className="text-base font-semibold text-gray-900 mb-3 line-clamp-2 min-h-[48px]">
                             {product.name}
                           </h5>
-                          <p className="text-xs text-blue-600 font-bold">
-                            {price !== null ? `₹${price.toLocaleString()}` : 'Contact for pricing'}
-                            {price !== null && cycle && (
-                              <span className="text-xs text-gray-500 ml-1">
-                                {cycle === '/month' ? '/mo' :
-                                 cycle === '/year' ? '/yr' :
-                                 cycle === '/3 years' ? '/3yr' :
-                                 cycle === '/one-time' ? '' : ''}
-                              </span>
-                            )}
-                          </p>
+                          <div className="mb-4">
+                            <div className="text-center">
+                              {price !== null ? (
+                                <div>
+                                  <span className="text-xl font-bold text-blue-600">
+                                    {formatIndianPrice(price)}
+                                  </span>
+                                  {cycle && (
+                                    <span className="text-sm text-gray-500 ml-1">
+                                      {cycle === '/month' ? '/month' :
+                                       cycle === '/year' ? '/year' :
+                                       cycle === '/3 years' ? '/3 years' :
+                                       cycle === '/one-time' ? '' : cycle}
+                                    </span>
+                                  )}
+                                </div>
+                              ) : (
+                                <span className="text-lg font-semibold text-gray-600">Contact for pricing</span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </Link>
+                        <div className="mt-auto space-y-2">
+                          <Link
+                            href={`/product/${product.slug}`}
+                            className="block w-full bg-blue-600 hover:bg-blue-700 text-white text-center py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                          >
+                            View Details
+                          </Link>
+                          <button
+                            onClick={(e) => {
+                              e.preventDefault();
+                              setSelectedProductForContact(product);
+                              setShowContactForm(true);
+                            }}
+                            className="w-full bg-green-600 hover:bg-green-700 text-white py-2 px-4 rounded-lg font-medium transition-colors duration-200"
+                          >
+                            Contact Us
+                          </button>
+                        </div>
+                      </div>
                     );
                   })}
               </div>
@@ -1312,7 +1434,15 @@ function ProductPage() {
                 product.category === selectedProduct.category && 
                 product.id !== selectedProduct.id
               ).length === 0 && (
-                <p className="text-gray-500 text-center py-4">No related products found.</p>
+                <div className="text-center py-12">
+                  <div className="text-gray-400 mb-4">
+                    <svg className="w-16 h-16 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                    </svg>
+                  </div>
+                  <p className="text-gray-500 text-lg">No related products found in this category.</p>
+                  <p className="text-gray-400 text-sm mt-2">Check out our other product categories for more options.</p>
+                </div>
               )}
             </div>
           </div>
