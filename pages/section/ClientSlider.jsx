@@ -41,9 +41,6 @@ const ClientSlider = () => {
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745496509/bonton-logo_rwl4lf.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745647539/hlf-services-logo_zi5nmc.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745647653/vcerp-logo_vouehe.png",
-    ];
-
-    const logos2 = [
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559668/marg_aamtoc.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559667/gro_b2ah8v.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559666/hhf_qqrolg.png",
@@ -55,9 +52,6 @@ const ClientSlider = () => {
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559662/marg-logo_omqdhz.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559650/hoec-logo_py4wmy.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559650/jamal_mohamed_-logo_r8bx6a.png",
-    ];
-
-    const logos3 = [
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559665/rock_worth_m8q5qt.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559664/spl_udjjtm.png",
         "https://res.cloudinary.com/daggx9p24/image/upload/v1745559664/tech_india_wntwyx.png",
@@ -73,6 +67,7 @@ const ClientSlider = () => {
 
 
 
+
     return (
         <div className="p-2">
             <Slider {...settings}>
@@ -83,22 +78,7 @@ const ClientSlider = () => {
                 ))}
                 
             </Slider>
-            <br />
-            <Slider {...settings}>
-                {logos2.map((logo, index) => (
-                    <div key={index} className="container">
-                        <img src={logo} alt='client img'  width={180} height={95} loading='lazy' className='logo-slider-img rounded-sm' />
-                    </div>
-                ))}
-            </Slider>
-            <br />
-            <Slider {...settings}>
-                {logos3.map((logo, index) => (
-                    <div key={index} className="container">
-                        <img src={logo} alt='client img'  width={180} height={95} loading='lazy' className='logo-slider-img rounded-sm' />
-                    </div>
-                ))}
-            </Slider>
+           
             
         </div>
     );
